@@ -21,7 +21,7 @@ import { ReactComponent as CustomCarIcon } from '../../../assets/station/car.svg
 import StationForm from '../Manage Station/Form/StationForm';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStations } from '../../../features/stations/stationSlice';
+import { fetchStations,deleteStation,searchStationByName } from '../../../features/stations/stationSlice';
 
 const StationCard = () => {
   const dispatch = useDispatch();
@@ -30,17 +30,28 @@ const StationCard = () => {
   const [showForm, setShowForm] = useState(false);
   const [currentStation, setCurrentStation] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const[searchStation,setSearchStation]=useState('');
 
   useEffect(() => {
     dispatch(fetchStations());
   }, [dispatch]);
-
+  useEffect(()=>{
+    if(searchStation.trim() === '')
+    {
+      dispatch(fetchStations())
+    }
+  },[searchStation,dispatch]);
   const handleEdit = (station) => {
     setCurrentStation(station);
     setIsEditing(true);
     setShowForm(true);
   };
-
+  const handleDelete = (stationId)=>{
+    if(window.confirm("Are you sure you want to delete this station ?"))
+    {
+      dispatch(deleteStation(stationId));
+    }
+  }
   const handleAdd = () => {
     setCurrentStation(null);
     setIsEditing(false);
@@ -88,6 +99,14 @@ const StationCard = () => {
           label="Search"
           variant="outlined"
           size="small"
+          value={searchStation}
+          onChange={(e)=>setSearchStation(e.target.value)}
+          onKeyDown={(e)=>{
+            if(e.key === 'Enter')
+            {
+              dispatch(searchStationByName(searchStation.trim()))
+            }
+          }}
           sx={{
             width: '300px',
             '& .MuiOutlinedInput-root': { backgroundColor: '#ffffff', borderRadius: '20px' },
@@ -98,7 +117,8 @@ const StationCard = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <Search sx={{ color: '#0155a5' }} />
+                <Search sx={{ color: '#0155a5',cursor:'pointer' }}
+                onClick={()=>dispatch(searchStationByName(searchStation.trim()))} />
               </InputAdornment>
             ),
           }}
@@ -113,8 +133,6 @@ const StationCard = () => {
               <TableCell sx={{ color: 'white' }}>Station ID</TableCell>
               <TableCell sx={{ color: 'white' }}>Station Name</TableCell>
               <TableCell sx={{ color: 'white' }}>Contact</TableCell>
-              <TableCell sx={{ color: 'white' }}>Email</TableCell>
->
               <TableCell sx={{ color: 'white' }}>Action</TableCell>
             </TableRow>
           </TableHead>
@@ -138,7 +156,7 @@ const StationCard = () => {
                   <TableCell>{station.stationId || station.id}</TableCell>
                   <TableCell>{station.stationName}</TableCell>
                   <TableCell>{station.contactNumber}</TableCell>
-                  <TableCell>{station.emailId}</TableCell>
+                 
                   
                   <TableCell>
                     <Button 
@@ -155,6 +173,23 @@ const StationCard = () => {
                       }}
                     >
                       Edit
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="outlined" 
+                      size="small"
+                      onClick={() => handleDelete(station.stationId)}
+                      sx={{
+                        color: '#0155a5',
+                        borderColor: '#0155a5',
+                        '&:hover': {
+                          backgroundColor: '#0155a510',
+                          borderColor: '#013f71',
+                        }
+                      }}
+                    >
+                      Delete
                     </Button>
                   </TableCell>
                 </TableRow>

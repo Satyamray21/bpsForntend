@@ -26,6 +26,31 @@ export const fetchStations = createAsyncThunk(
     }
   }
 );
+export const deleteStation = createAsyncThunk(
+  'stations/deleteStation',async(stationId,thunkApi)=>{
+    try{
+      const res = await axios.delete(`${BASE_URL}/stations/delete/${stationId}`);
+      return stationId
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Stations");
+    }
+  }
+);
+
+export const searchStationByName = createAsyncThunk(
+  'stations/searchByName',async(stationName,thunkApi)=>{
+    try{
+      const res = await axios.get(`${BASE_URL}/stations/name/${stationName}`);
+      return res.data.data
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Stations");
+    }
+  }
+)
 
 const initialState = {
   list: [],
@@ -85,6 +110,17 @@ const stationSlice = createSlice({
       .addCase(fetchStations.rejected,(state,action)=>{
         state.loading=false;
         state.error=action.payload
+      })
+      .addCase(deleteStation.fulfilled,(state,action)=>{
+        state.list = state.list.filter(station=>station.stationId !== action.payload);
+      })
+      .addCase(searchStationByName.loading,(state,action)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(searchStationByName.fulfilled,(state,action)=>{
+      state.loading=false;
+      state.stations=action.payload
       })
       ;
   },

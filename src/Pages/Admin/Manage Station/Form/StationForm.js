@@ -9,7 +9,7 @@ import {
 import { Close, LocalPhone, Email, Home, LocationOn, PinDrop } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
-import { createStation } from '../../../../features/stations/stationSlice';
+import { createStation,fetchStations } from '../../../../features/stations/stationSlice';
 
 const StationForm = ({ open, onClose }) => {
   const dispatch = useDispatch();
@@ -42,6 +42,7 @@ const StationForm = ({ open, onClose }) => {
     onSubmit: async (values) => {
       try {
         await dispatch(createStation(values)).unwrap();
+        await dispatch(fetchStations());
         formik.resetForm();
         onClose();
       } catch (err) {
