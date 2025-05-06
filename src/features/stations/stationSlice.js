@@ -43,7 +43,8 @@ export const searchStationByName = createAsyncThunk(
   'stations/searchByName',async(stationName,thunkApi)=>{
     try{
       const res = await axios.get(`${BASE_URL}/stations/name/${stationName}`);
-      return res.data.data
+      const data = res.data.data; 
+      return Array.isArray(data) ? data : [data];
     }
     catch(error)
     {
@@ -120,7 +121,7 @@ const stationSlice = createSlice({
       })
       .addCase(searchStationByName.fulfilled,(state,action)=>{
       state.loading=false;
-      state.stations=action.payload
+      state.list=action.payload
       })
       ;
   },

@@ -149,8 +149,9 @@ const StationCard = () => {
               <TableRow>
                 <TableCell colSpan={6} align="center">No stations found</TableCell>
               </TableRow>
-            ) : (
-              stations.map((station, index) => (
+            ) : (  
+              
+              Array.isArray(stations) &&stations.map((station, index) => (
                 <TableRow key={station._id || station.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{station.stationId || station.id}</TableCell>
