@@ -1,7 +1,9 @@
-import { createSlice,createAsyncThunk} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:8000/api/v2';
+
+// Async Thunks
 
 export const createStation = createAsyncThunk(
   'stations/createStation',
@@ -16,42 +18,55 @@ export const createStation = createAsyncThunk(
 );
 
 export const fetchStations = createAsyncThunk(
-  'stations/fetchStations',async(_,thunkApi)=>{
-    try{
+  'stations/fetchStations',
+  async (_, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/stations/getAllStations`);
       return res.data.message;
-    }catch(error)
-    {
-        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Stations");
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to fetch Stations");
     }
   }
 );
+
 export const deleteStation = createAsyncThunk(
-  'stations/deleteStation',async(stationId,thunkApi)=>{
-    try{
-      const res = await axios.delete(`${BASE_URL}/stations/delete/${stationId}`);
-      return stationId
-    }
-    catch(error)
-    {
-      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Stations");
+  'stations/deleteStation',
+  async (stationId, thunkApi) => {
+    try {
+      await axios.delete(`${BASE_URL}/stations/delete/${stationId}`);
+      return stationId;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Station");
     }
   }
 );
 
 export const searchStationByName = createAsyncThunk(
-  'stations/searchByName',async(stationName,thunkApi)=>{
-    try{
+  'stations/searchByName',
+  async (stationName, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/stations/name/${stationName}`);
-      const data = res.data.data; 
+      const data = res.data.data;
       return Array.isArray(data) ? data : [data];
-    }
-    catch(error)
-    {
-      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Stations");
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to search Stations");
     }
   }
-)
+);
+
+export const fetchStationById = createAsyncThunk(
+  'stations/fetchStationById',
+  async (stationId, thunkApi) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/stations/searchById/${stationId}`);
+      return res.data.data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to fetch Station by ID");
+    }
+  }
+);
+
+// Initial State
 
 const initialState = {
   list: [],
@@ -64,9 +79,13 @@ const initialState = {
     city: '',
     pincode: '',
   },
+  currentStation: null, // Used in view/edit
+  loading: false,
   status: 'idle',
   error: null,
 };
+
+// Slice
 
 const stationSlice = createSlice({
   name: 'stations',
@@ -85,14 +104,22 @@ const stationSlice = createSlice({
     setStations: (state, action) => {
       state.list = action.payload;
     },
+    setCurrentStation: (state, action) => {
+      state.currentStation = action.payload;
+    },
+    clearCurrentStation: (state) => {
+      state.currentStation = null;
+    }
   },
   extraReducers: (builder) => {
     builder
+
+      // Create Station
       .addCase(createStation.pending, (state) => {
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(createStation.fulfilled, (state, action) => {
+      .addCase(createStation.fulfilled, (state) => {
         state.status = 'succeeded';
         state.error = null;
       })
@@ -100,34 +127,66 @@ const stationSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload;
       })
-      .addCase(fetchStations.pending,(state)=>{
-        state.loading=true;
-        state.error=null
+
+      // Fetch All Stations
+      .addCase(fetchStations.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchStations.fulfilled,(state,action)=>{
-        state.loading=false;
-        state.list=action.payload
+      .addCase(fetchStations.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
       })
-      .addCase(fetchStations.rejected,(state,action)=>{
-        state.loading=false;
-        state.error=action.payload
+      .addCase(fetchStations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
-      .addCase(deleteStation.fulfilled,(state,action)=>{
-        state.list = state.list.filter(station=>station.stationId !== action.payload);
+
+      // Delete Station
+      .addCase(deleteStation.fulfilled, (state, action) => {
+        state.list = state.list.filter(station => station.stationId !== action.payload);
       })
-      .addCase(searchStationByName.pending,(state,action)=>{
-        state.loading=true;
-        state.error=null
+      .addCase(deleteStation.rejected, (state, action) => {
+        state.error = action.payload;
       })
-      .addCase(searchStationByName.fulfilled,(state,action)=>{
-      state.loading=false;
-      state.list=action.payload
+
+      // Search Station By Name
+      .addCase(searchStationByName.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      ;
-  },
+      .addCase(searchStationByName.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(searchStationByName.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch Station By ID
+      .addCase(fetchStationById.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchStationById.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.currentStation = action.payload;
+      })
+      .addCase(fetchStationById.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      });
+  }
 });
 
-
-export const { setFormField, resetForm, addStation, setStations } = stationSlice.actions;
+export const {
+  setFormField,
+  resetForm,
+  addStation,
+  setStations,
+  setCurrentStation,
+  clearCurrentStation
+} = stationSlice.actions;
 
 export default stationSlice.reducer;

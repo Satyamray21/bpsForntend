@@ -19,9 +19,10 @@ import {
 import { AdsClick, Search } from '@mui/icons-material';
 import { ReactComponent as CustomCarIcon } from '../../../assets/station/car.svg';
 import StationForm from '../Manage Station/Form/StationForm';
+import StationViewForm from '../Manage Station/Form/StationViewForm';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStations,deleteStation,searchStationByName } from '../../../features/stations/stationSlice';
+import { fetchStations, deleteStation, searchStationByName, fetchStationById } from '../../../features/stations/stationSlice';
 
 const StationCard = () => {
   const dispatch = useDispatch();
@@ -30,32 +31,43 @@ const StationCard = () => {
   const [showForm, setShowForm] = useState(false);
   const [currentStation, setCurrentStation] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const[searchStation,setSearchStation]=useState('');
+  const [searchStation, setSearchStation] = useState('');
+
+  const [viewStation, setViewStation] = useState(null);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
 
   useEffect(() => {
     dispatch(fetchStations());
   }, [dispatch]);
-  useEffect(()=>{
-    if(searchStation.trim() === '')
-    {
-      dispatch(fetchStations())
+
+  useEffect(() => {
+    if (searchStation.trim() === '') {
+      dispatch(fetchStations());
     }
-  },[searchStation,dispatch]);
-  const handleEdit = (station) => {
-    setCurrentStation(station);
+  }, [searchStation, dispatch]);
+
+  const handleEdit = (stationId) => {
+    // Fetch the station data by its ID when editing
+    dispatch(fetchStationById(stationId));  // This will set the currentStation state in your redux store
     setIsEditing(true);
     setShowForm(true);
   };
-  const handleDelete = (stationId)=>{
-    if(window.confirm("Are you sure you want to delete this station ?"))
-    {
+
+  const handleDelete = (stationId) => {
+    if (window.confirm('Are you sure you want to delete this station?')) {
       dispatch(deleteStation(stationId));
     }
-  }
+  };
+
   const handleAdd = () => {
     setCurrentStation(null);
     setIsEditing(false);
     setShowForm(true);
+  };
+
+  const handleView = (station) => {
+    setViewStation(station);
+    setOpenViewDialog(true);
   };
 
   return (
@@ -100,11 +112,10 @@ const StationCard = () => {
           variant="outlined"
           size="small"
           value={searchStation}
-          onChange={(e)=>setSearchStation(e.target.value)}
-          onKeyDown={(e)=>{
-            if(e.key === 'Enter')
-            {
-              dispatch(searchStationByName(searchStation.trim()))
+          onChange={(e) => setSearchStation(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              dispatch(searchStationByName(searchStation.trim()));
             }
           }}
           sx={{
@@ -117,8 +128,10 @@ const StationCard = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <Search sx={{ color: '#0155a5',cursor:'pointer' }}
-                onClick={()=>dispatch(searchStationByName(searchStation.trim()))} />
+                <Search
+                  sx={{ color: '#0155a5', cursor: 'pointer' }}
+                  onClick={() => dispatch(searchStationByName(searchStation.trim()))}
+                />
               </InputAdornment>
             ),
           }}
@@ -133,37 +146,55 @@ const StationCard = () => {
               <TableCell sx={{ color: 'white' }}>Station ID</TableCell>
               <TableCell sx={{ color: 'white' }}>Station Name</TableCell>
               <TableCell sx={{ color: 'white' }}>Contact</TableCell>
-              <TableCell sx={{ color: 'white' }}>Action</TableCell>
+              <TableCell sx={{ color: 'white' }}>View</TableCell>
+              <TableCell sx={{ color: 'white' }}>Edit</TableCell>
+              <TableCell sx={{ color: 'white' }}>Delete</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">Loading...</TableCell>
+                <TableCell colSpan={7} align="center">Loading...</TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">{error}</TableCell>
+                <TableCell colSpan={7} align="center">{error}</TableCell>
               </TableRow>
             ) : stations.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">No stations found</TableCell>
+                <TableCell colSpan={7} align="center">No stations found</TableCell>
               </TableRow>
-            ) : (  
-              
-              Array.isArray(stations) &&stations.map((station, index) => (
+            ) : (
+              Array.isArray(stations) && stations.map((station, index) => (
                 <TableRow key={station._id || station.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{station.stationId || station.id}</TableCell>
                   <TableCell>{station.stationName}</TableCell>
                   <TableCell>{station.contactNumber}</TableCell>
-                 
-                  
+
                   <TableCell>
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="outlined"
                       size="small"
-                      onClick={() => handleEdit(station)}
+                      onClick={() => handleView(station)}
+                      sx={{
+                        color: '#0155a5',
+                        borderColor: '#0155a5',
+                        '&:hover': {
+                          backgroundColor: '#0155a510',
+                          borderColor: '#013f71',
+                        }
+                      }}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleEdit(station.stationId)}
                       sx={{
                         color: '#0155a5',
                         borderColor: '#0155a5',
@@ -176,9 +207,10 @@ const StationCard = () => {
                       Edit
                     </Button>
                   </TableCell>
+
                   <TableCell>
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="outlined"
                       size="small"
                       onClick={() => handleDelete(station.stationId)}
                       sx={{
@@ -200,16 +232,25 @@ const StationCard = () => {
         </Table>
       </TableContainer>
 
-      <StationForm 
-        open={showForm} 
+      <StationForm
+        open={showForm}
         onClose={() => {
           setShowForm(false);
           setCurrentStation(null);
           setIsEditing(false);
-        }} 
-        onSubmit={() => {}} // Form handling via Redux (you can dispatch createStation here)
+        }}
+        onSubmit={() => {}}
         initialValues={currentStation}
         isEditing={isEditing}
+      />
+
+      <StationViewForm
+        open={openViewDialog}
+        onClose={() => {
+          setOpenViewDialog(false);
+          setViewStation(null);
+        }}
+        station={viewStation}
       />
     </>
   );
