@@ -114,7 +114,7 @@ const stationSlice = createSlice({
       .addCase(deleteStation.fulfilled,(state,action)=>{
         state.list = state.list.filter(station=>station.stationId !== action.payload);
       })
-      .addCase(searchStationByName.loading,(state,action)=>{
+      .addCase(searchStationByName.pending,(state,action)=>{
         state.loading=true;
         state.error=null
       })
