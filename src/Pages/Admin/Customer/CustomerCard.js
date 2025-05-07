@@ -14,7 +14,7 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchActiveCustomer, fetchBlackListedCustomer,fetchActiveCustomerCount,fetchBlackListedCustomerCount } from '../../../features/customers/customerSlice';
+import { fetchActiveCustomer,deleteCustomer, fetchBlackListedCustomer,fetchActiveCustomerCount,fetchBlackListedCustomerCount } from '../../../features/customers/customerSlice';
 
 const customerHeadCells = [
   { id: 'index', label: 'S. No', sortable: false },
@@ -82,6 +82,12 @@ const CustomerCard = () => {
 
   const handleAdd = () => navigate('/customerform');
   const handleView = (customerId) => navigate(`/customerview/${customerId}`);
+  const handleDelete = (customerId)=>{
+      if(window.confirm("Are you sure you want to delete this customer ?"))
+      {
+        dispatch(deleteCustomer(customerId));
+      }
+    }
 
   const handleFetchActive = () => dispatch(fetchActiveCustomer());
   const handleFetchBlacklisted = () => dispatch(fetchBlackListedCustomer());
@@ -195,9 +201,15 @@ const CustomerCard = () => {
                       <IconButton size="small" color="primary" title="Edit">
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" color="error" title="Delete">
+                      <IconButton
+                            size="small"
+                           color="error"
+                           title="Delete"
+                           onClick={() => handleDelete(row.customerId)}
+                        >
                         <DeleteIcon fontSize="small" />
-                      </IconButton>
+                        </IconButton>
+
                       <IconButton size="small" title="More options">
                         <MoreVertIcon fontSize="small" />
                       </IconButton>

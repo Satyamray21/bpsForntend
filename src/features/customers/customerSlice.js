@@ -73,6 +73,18 @@ export const fetchBlackListedCustomerCount = createAsyncThunk(
     }
   }
 );
+export const deleteCustomer = createAsyncThunk(
+  'stations/deleteCustomer',async(customerId,thunkApi)=>{
+    try{
+      const res = await axios.delete(`${BASE_URL}/delete/${customerId}`);
+      return customerId
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Customer");
+    }
+  }
+);
 
 const initialState = {
     list: [],
@@ -177,7 +189,11 @@ const initialState = {
       .addCase(fetchBlackListedCustomerCount.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(deleteCustomer.fulfilled,(state,action)=>{
+              state.list = state.list.filter(customer=>customer.customerId !== action.payload);
+            })
+      ;
       }
     }
 
