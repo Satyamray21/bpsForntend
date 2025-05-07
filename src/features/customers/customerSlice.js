@@ -37,6 +37,18 @@ export const fetchActiveCustomer = createAsyncThunk(
     }
   }
 ) 
+export const fetchActiveCustomerCount = createAsyncThunk(
+  'customers/fetchActiveCustomerCount',
+  async (_, thunkApi) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/active-count`);
+      return { activeCount: res.data.message.activeCount };
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.data || "Failed to fetch Active Customer Count");
+    }
+  }
+);
+
 
 export const fetchBlackListedCustomer = createAsyncThunk(
   'customers/fetchBlackListedCustomer',async(_,thunkApi)=>{
@@ -50,8 +62,22 @@ export const fetchBlackListedCustomer = createAsyncThunk(
     }
   }
 ) 
+export const fetchBlackListedCustomerCount = createAsyncThunk(
+  'customers/fetchBlackListedCustomerCount',
+  async (_, thunkApi) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/blacklisted-count`);
+      return { blacklistCount: res.data.message.blacklistedCount };
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.data || "Failed to fetch Blacklisted Customer Count");
+    }
+  }
+);
+
 const initialState = {
     list: [],
+    activeCount: 0,
+    blacklistCount: 0,
     form: {
         firstName: '',
         middleName: '',
@@ -128,7 +154,30 @@ const initialState = {
                 state.error=action.payload
               })
               
-        ;
+        .addCase(fetchActiveCustomerCount.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchActiveCustomerCount.fulfilled, (state, action) => {
+        state.loading = false;
+        state.activeCount = action.payload.activeCount;
+      })
+      .addCase(fetchActiveCustomerCount.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchBlackListedCustomerCount.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBlackListedCustomerCount.fulfilled, (state, action) => {
+        state.loading = false;
+        state.blacklistCount = action.payload.blacklistCount;
+      })
+      .addCase(fetchBlackListedCustomerCount.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
       }
     }
 
