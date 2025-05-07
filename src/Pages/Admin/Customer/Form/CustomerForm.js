@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -18,10 +18,12 @@ import {
   FormHelperText
 } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
-
+import { useDispatch,useSelector } from 'react-redux';
+import {fetchStates,fetchCities,clearCities} from '../../../../features/Location/locationSlice';
+import {createCustomer} from '../../../../features/customers/customerSlice'
 const CustomerForm = () => {
-  const states = ['Uttar Pradesh', 'Delhi', 'Haryana', 'Punjab'];
-  const cities = ['Noida', 'Ghaziabad', 'Delhi', 'Gurgaon'];
+  const dispatch = useDispatch();
+  const {states,cities} = useSelector((state)=>state.location);
 
   // Validation Schema
   const validationSchema = Yup.object().shape({
@@ -30,7 +32,7 @@ const CustomerForm = () => {
     contactNumber: Yup.string()
       .required('Contact Number is required')
       .matches(/^[0-9]{10}$/, 'Contact Number must be 10 digits'),
-    email: Yup.string()
+    emailId: Yup.string()
       .email('Invalid email address')
       .required('Email is required'),
     address: Yup.string().required('Address is required'),
@@ -41,8 +43,8 @@ const CustomerForm = () => {
       .required('Pincode is required')
       .matches(/^[0-9]{6}$/, 'Pincode must be 6 digits'),
     idProof: Yup.string().required('ID Proof is required'),
-    idPhoto: Yup.mixed().required('ID Photo is required'),
-    customerPhoto: Yup.mixed().required('Customer Photo is required')
+    idProofPhoto: Yup.mixed().required('ID Photo is required'),
+    customerProfilePhoto: Yup.mixed().required('Customer Photo is required')
   });
 
   // Formik setup
@@ -52,22 +54,43 @@ const CustomerForm = () => {
       middleName: '',
       lastName: '',
       contactNumber: '',
-      email: '',
+      emailId: '',
       address: '',
       state: '',
       city: '',
       district: '',
       pincode: '',
       idProof: '',
-      idPhoto: null,
-      customerPhoto: null
+      idProofPhoto: null,
+      customerProfilePhoto: null
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      alert("Form submitted successfully!");
+    onSubmit: async (values) => {
+      try{
+        await dispatch(createCustomer(values)).unwrap();
+        formik.resetForm();
+        
+      }
+      catch(error)
+      {
+        console.log("Error while adding customer",error);
+      }
     }
   });
+  useEffect(()=>{
+    dispatch(fetchStates());
+  },[])
+
+  useEffect(()=>{
+    if(formik.values.state)
+    {
+      dispatch(fetchCities(formik.values.state));
+    }
+    else
+    {
+      dispatch(clearCities());
+    }
+  },[formik.values.state, dispatch])
 
   const handleFileChange = (field, file) => {
     formik.setFieldValue(field, file);
@@ -206,11 +229,16 @@ const CustomerForm = () => {
                         <Select
                           name="state"
                           value={formik.values.state}
-                          onChange={formik.handleChange}
+                          onChange={(e)=>{
+                            const selectedState = e.target.value;
+                            formik.setFieldValue('state',selectedState);
+                            formik.setFieldValue('city','');
+                            dispatch(fetchCities(selectedState));
+                          }}
                           onBlur={formik.handleBlur}
                           label="State *"
                         >
-                          {states.map((state) => (
+                          {Array.isArray(states) && states.map((state) => (
                             <MenuItem key={state} value={state}>{state}</MenuItem>
                           ))}
                         </Select>
@@ -233,7 +261,7 @@ const CustomerForm = () => {
                           onBlur={formik.handleBlur}
                           label="City *"
                         >
-                          {cities.map((city) => (
+                          {Array.isArray(states) && cities.map((city) => (
                             <MenuItem key={city} value={city}>{city}</MenuItem>
                           ))}
                         </Select>
@@ -307,23 +335,23 @@ const CustomerForm = () => {
                         startIcon={<CloudUpload />}
                         size="small"
                         sx={{ height: '40px' }}
-                        color={formik.touched.idPhoto && formik.errors.idPhoto ? 'error' : 'primary'}
+                        color={formik.touched.idProofPhoto && formik.errors.idProofPhoto ? 'error' : 'primary'}
                       >
                         Upload ID Photo *
                         <input
                           type="file"
                           hidden
                           accept="image/*"
-                          onChange={(e) => handleFileChange('idPhoto', e.target.files[0])}
+                          onChange={(e) => handleFileChange('idProofPhoto', e.target.files[0])}
                         />
                       </Button>
-                      {formik.values.idPhoto && (
+                      {formik.values.idProofPhoto && (
                         <Typography variant="caption" color="text.secondary">
-                          {formik.values.idPhoto.name}
+                          {formik.values.idProofPhoto.name}
                         </Typography>
                       )}
-                      {formik.touched.idPhoto && formik.errors.idPhoto && (
-                        <FormHelperText error>{formik.errors.idPhoto}</FormHelperText>
+                      {formik.touched.idProofPhoto && formik.errors.idProofPhoto && (
+                        <FormHelperText error>{formik.errors.idProofPhoto}</FormHelperText>
                       )}
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
@@ -334,23 +362,23 @@ const CustomerForm = () => {
                         startIcon={<CloudUpload />}
                         size="small"
                         sx={{ height: '40px' }}
-                        color={formik.touched.customerPhoto && formik.errors.customerPhoto ? 'error' : 'primary'}
+                        color={formik.touched.customerProfilePhoto && formik.errors.customerProfilePhoto ? 'error' : 'primary'}
                       >
                         Upload Customer Photo *
                         <input
                           type="file"
                           hidden
                           accept="image/*"
-                          onChange={(e) => handleFileChange('customerPhoto', e.target.files[0])}
+                          onChange={(e) => handleFileChange('customerProfilePhoto', e.target.files[0])}
                         />
                       </Button>
-                      {formik.values.customerPhoto && (
+                      {formik.values.customerProfilePhoto && (
                         <Typography variant="caption" color="text.secondary">
-                          {formik.values.customerPhoto.name}
+                          {formik.values.customerProfilePhoto.name}
                         </Typography>
                       )}
-                      {formik.touched.customerPhoto && formik.errors.customerPhoto && (
-                        <FormHelperText error>{formik.errors.customerPhoto}</FormHelperText>
+                      {formik.touched.customerProfilePhoto && formik.errors.customerProfilePhoto && (
+                        <FormHelperText error>{formik.errors.customerProfilePhoto}</FormHelperText>
                       )}
                     </Grid>
                   </Grid>
@@ -366,6 +394,7 @@ const CustomerForm = () => {
                 color="primary"
                 size="large"
                 sx={{ px: 6, py: 1.5, fontSize: '1rem' }}
+                onClick={formik.handleSubmit}
                 disabled={!formik.isValid || formik.isSubmitting}
               >
                 Submit Registration
