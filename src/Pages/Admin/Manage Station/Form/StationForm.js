@@ -8,68 +8,54 @@ import {
 } from '@mui/material';
 import { Close, LocalPhone, Email, Home, LocationOn, PinDrop } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  fetchStates,
-  fetchCities,
-  clearCities
-} from '../../../../features/Location/locationSlice';
-import {
-  createStation,
-  fetchStations,
-  clearCurrentStation
-} from '../../../../features/stations/stationSlice';
+import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
+import { createStation,fetchStations } from '../../../../features/stations/stationSlice';
 
 const StationForm = ({ open, onClose }) => {
   const dispatch = useDispatch();
   const { states, cities } = useSelector((state) => state.location);
-  const { currentStation } = useSelector((state) => state.stations);
+
 
   const validationSchema = Yup.object().shape({
     stationName: Yup.string().required('Station name is required'),
-    contact: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required('Contact is required'),
-    emailId: Yup.string().email('Invalid email').required('Email is required'),
-    address: Yup.string().required('Address is required'),
+    contact: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required(),
+    emailId: Yup.string().email('Invalid email').required(),
+    address: Yup.string().required(),
     street: Yup.string(),
-    state: Yup.string().required('State is required'),
-    city: Yup.string().required('City is required'),
-    pincode: Yup.string().matches(/^\d{6}$/, 'Must be 6 digits').required('PIN Code is required'),
+    state: Yup.string().required(),
+    city: Yup.string().required(),
+    pincode: Yup.string().matches(/^\d{6}$/, 'Must be 6 digits').required(),
   });
 
   const formik = useFormik({
-    enableReinitialize: true,
     initialValues: {
-      stationName: currentStation?.stationName || '',
-      contact: currentStation?.contact || '',
-      emailId: currentStation?.emailId || '',
-      address: currentStation?.address || '',
-      street: currentStation?.street || '',
-      state: currentStation?.state || '',
-      city: currentStation?.city || '',
-      pincode: currentStation?.pincode || '',
+      stationName: '',
+      contact: '',
+      emailId: '',
+      address: '',
+      street: '',
+      state: '',
+      city: '',
+      pincode: '',
     },
     validationSchema,
     onSubmit: async (values) => {
       try {
-        await dispatch(createStation(values)).unwrap(); // change to updateStation if editing
+        await dispatch(createStation(values)).unwrap();
         await dispatch(fetchStations());
         formik.resetForm();
-        handleClose();
+        onClose();
       } catch (err) {
-        console.error('Error creating/updating station:', err);
+        console.error('Error creating station:', err);
       }
     },
+    
   });
-
-  const handleClose = () => {
-    formik.resetForm();
-    dispatch(clearCurrentStation());
-    onClose();
-  };
 
   useEffect(() => {
     dispatch(fetchStates());
-  }, [dispatch]);
-
+  }, []);
+  // When state changes, fetch cities
   useEffect(() => {
     if (formik.values.state) {
       dispatch(fetchCities(formik.values.state));
@@ -79,13 +65,11 @@ const StationForm = ({ open, onClose }) => {
   }, [formik.values.state, dispatch]);
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5">
-            {currentStation ? 'Edit Station' : 'Add New Station'}
-          </Typography>
-          <IconButton onClick={handleClose}><Close /></IconButton>
+          <Typography variant="h5">Add New Station</Typography>
+          <IconButton onClick={onClose}><Close /></IconButton>
         </Box>
       </DialogTitle>
 
@@ -134,7 +118,7 @@ const StationForm = ({ open, onClose }) => {
                 value={formik.values.emailId}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.emailId && Boolean(formik.errors.emailId)}
+                error={formik.touched.email && Boolean(formik.errors.emailId)}
                 helperText={formik.touched.emailId && formik.errors.emailId}
                 InputProps={{
                   startAdornment: (
@@ -168,6 +152,7 @@ const StationForm = ({ open, onClose }) => {
               <FormControl
                 fullWidth
                 error={formik.touched.state && Boolean(formik.errors.state)}
+                sx={{ minWidth: 300 }} // Increase this value as needed
               >
                 <InputLabel id="state-label">State</InputLabel>
                 <Select
@@ -184,7 +169,8 @@ const StationForm = ({ open, onClose }) => {
                   }}
                   onBlur={formik.handleBlur}
                 >
-                  {Array.isArray(states) && states.map((state) => (
+                  {Array.isArray(states) &&
+                  states.map((state) => (
                     <MenuItem key={state} value={state}>
                       {state}
                     </MenuItem>
@@ -202,6 +188,7 @@ const StationForm = ({ open, onClose }) => {
               <FormControl
                 fullWidth
                 error={formik.touched.city && Boolean(formik.errors.city)}
+                sx={{ minWidth: 300 }}
               >
                 <InputLabel id="city-label">City</InputLabel>
                 <Select
@@ -214,7 +201,8 @@ const StationForm = ({ open, onClose }) => {
                   onBlur={formik.handleBlur}
                   disabled={!formik.values.state}
                 >
-                  {Array.isArray(cities) && cities.map((city) => (
+                  {Array.isArray(states) &&
+                  cities.map((city) => (
                     <MenuItem key={city} value={city}>
                       {city}
                     </MenuItem>
@@ -250,14 +238,14 @@ const StationForm = ({ open, onClose }) => {
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={handleClose} variant="outlined">Cancel</Button>
+        <Button onClick={onClose} variant="outlined">Cancel</Button>
         <Button
           color="primary"
           variant="contained"
           onClick={formik.handleSubmit}
           disabled={!formik.isValid || formik.isSubmitting}
         >
-          {currentStation ? 'Update Station' : 'Save Station'}
+          Save Station
         </Button>
       </DialogActions>
     </Dialog>
