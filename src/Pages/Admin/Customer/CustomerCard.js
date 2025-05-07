@@ -14,7 +14,7 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchActiveCustomer, fetchBlackListedCustomer } from '../../../features/customers/customerSlice';
+import { fetchActiveCustomer, fetchBlackListedCustomer,fetchActiveCustomerCount,fetchBlackListedCustomerCount } from '../../../features/customers/customerSlice';
 
 const customerHeadCells = [
   { id: 'index', label: 'S. No', sortable: false },
@@ -56,11 +56,14 @@ const CustomerCard = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const customerList = useSelector(state => state.customers.list);
+  const { list: customerList, activeCount, blacklistCount } = useSelector(state => state.customers);
+
   const isLoading = useSelector(state => state.customers.loading);
 
   useEffect(() => {
-    dispatch(fetchActiveCustomer()); // default load
+    dispatch(fetchActiveCustomer());
+    dispatch(fetchActiveCustomerCount());
+  dispatch(fetchBlackListedCustomerCount()); // default load
   }, [dispatch]);
 
   const handleSearch = (event) => setSearchTerm(event.target.value.toLowerCase());
@@ -114,7 +117,7 @@ const CustomerCard = () => {
         <Card sx={{ flex: 1, borderRadius: 2, boxShadow: 3, cursor: 'pointer' }} onClick={handleFetchActive}>
           <CardContent>
             <Typography variant="h4" color="success.main" fontWeight={600}>
-              {customerList.length}
+              {activeCount}
             </Typography>
             <Typography variant="subtitle1" fontWeight={500}>Active Customers</Typography>
             <Typography variant="body2" color="text.secondary">(30 days)</Typography>
@@ -124,7 +127,7 @@ const CustomerCard = () => {
         <Card sx={{ flex: 1, borderRadius: 2, boxShadow: 3, cursor: 'pointer' }} onClick={handleFetchBlacklisted}>
           <CardContent>
             <Typography variant="h4" color="error.main" fontWeight={600}>
-              {customerList.length}
+              {blacklistCount}
             </Typography>
             <Typography variant="subtitle1" fontWeight={500}>Blacklisted Customers</Typography>
             <Typography variant="body2" color="text.secondary">(30 days)</Typography>
