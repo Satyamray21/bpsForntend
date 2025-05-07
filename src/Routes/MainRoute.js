@@ -15,6 +15,7 @@ import LedgerCard from '../Pages/Admin/Ledger/LedgerCard';
 import UserCard from '../Pages/Admin/Manage User/UserCard';
 import StationCard from '../Pages/Admin/Manage Station/StationCard';
 import StationForm from '../Pages/Admin/Manage Station/Form/StationForm';
+import CustomerForm from '../Pages/Admin/Customer/Form/CustomerForm'
 
 const MainRoute = () => {
     const isAuthenticated = true; // Replace with real auth check
@@ -37,6 +38,7 @@ const MainRoute = () => {
                 <Route path='/station' element={<StationCard />} />
                 <Route path='/contact' element={<ContactCard />} />
                 <Route path='/stationform' element={<StationForm />} />
+                <Route path='/customerform' element={<CustomerForm />} />
             </Routes>
         </DashboardLayout>
     ) : (
