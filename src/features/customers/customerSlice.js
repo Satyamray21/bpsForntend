@@ -6,13 +6,50 @@ export const createCustomer = createAsyncThunk(
   'customer/createCustomer',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/create`, data);
+      const formData = new FormData();
+      for (const key in data) {
+        if (data[key]) {
+          formData.append(key, data[key]);
+        }
+      }
+
+      const response = await axios.post(`${BASE_URL}/create`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       return response.data.message;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
+export const fetchActiveCustomer = createAsyncThunk(
+  'customers/fetchActiveCustomer',async(_,thunkApi)=>{
+    try{
+      const res = await axios.get(`${BASE_URL}/active-list`)
+      return res.data.message;
+    }
+    catch(error)
+    {
+        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Active Customer");
+    }
+  }
+) 
+
+export const fetchBlackListedCustomer = createAsyncThunk(
+  'customers/fetchBlackListedCustomer',async(_,thunkApi)=>{
+    try{
+      const res = await axios.get(`${BASE_URL}/blacklisted-list`)
+      return res.data.message;
+    }
+    catch(error)
+    {
+        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Blacklisted  Customer");
+    }
+  }
+) 
 const initialState = {
     list: [],
     form: {
@@ -66,6 +103,31 @@ const initialState = {
             state.loading=false;
             state.error=action.payload
         })
+            .addCase(fetchActiveCustomer.pending,(state)=>{
+                state.loading=true;
+                state.error=null
+              })
+              .addCase(fetchActiveCustomer.fulfilled,(state,action)=>{
+                state.loading=false;
+                state.list=action.payload
+              })
+              .addCase(fetchActiveCustomer.rejected,(state,action)=>{
+                state.loading=false;
+                state.error=action.payload
+              })
+              .addCase(fetchBlackListedCustomer.pending,(state)=>{
+                state.loading=true;
+                state.error=null
+              })
+              .addCase(fetchBlackListedCustomer.fulfilled,(state,action)=>{
+                state.loading=false;
+                state.list=action.payload
+              })
+              .addCase(fetchBlackListedCustomer.rejected,(state,action)=>{
+                state.loading=false;
+                state.error=action.payload
+              })
+              
         ;
       }
     }
