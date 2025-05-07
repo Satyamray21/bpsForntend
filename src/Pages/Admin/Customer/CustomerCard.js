@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box, Card, CardContent, Typography, TextField, InputAdornment, IconButton, Paper,
-  Table, TableBody, TableCell, TableContainer, TableHead, 
-  TablePagination, TableRow,TableSortLabel, Button
+  Table, TableBody, TableCell, TableContainer, TableHead,
+  TablePagination, TableRow, TableSortLabel, Button
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import BlockIcon from '@mui/icons-material/Block';
 import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';                
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchActiveCustomer, fetchBlackListedCustomer } from '../../../features/customers/customerSlice';
 
 const customerHeadCells = [
   { id: 'index', label: 'S. No', sortable: false },
@@ -20,11 +22,6 @@ const customerHeadCells = [
   { id: 'name', label: 'Name', sortable: true },
   { id: 'contact', label: 'Contact', sortable: false },
   { id: 'actions', label: 'Actions', sortable: false },
-];
-
-const customerData = [
-  { id: 1, customerId: 'CU001', name: 'Michael Scott', contact: '1122334455' },
-  { id: 2, customerId: 'CU002', name: 'Pam Beesly', contact: '2233445566' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -51,47 +48,53 @@ function stableSort(array, comparator) {
 
 const CustomerCard = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('name');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const handleAdd = () => {
-    navigate('/customerform');
-  };
+  const customerList = useSelector(state => state.customers.list);
+  const isLoading = useSelector(state => state.customers.loading);
 
-  const handleView = (customerId) => {
-    navigate(`/customerview/${customerId}`);
-  };
+  useEffect(() => {
+    dispatch(fetchActiveCustomer()); // default load
+  }, [dispatch]);
 
   const handleSearch = (event) => setSearchTerm(event.target.value.toLowerCase());
+
   const handleRequestSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
+
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const filteredCustomers = customerData.filter(row =>
-    row.name.toLowerCase().includes(searchTerm) ||
-    row.customerId.toLowerCase().includes(searchTerm)
+  const handleAdd = () => navigate('/customerform');
+  const handleView = (customerId) => navigate(`/customerview/${customerId}`);
+
+  const handleFetchActive = () => dispatch(fetchActiveCustomer());
+  const handleFetchBlacklisted = () => dispatch(fetchBlackListedCustomer());
+
+  const filteredCustomers = customerList?.filter((row) =>
+    row?.name?.toLowerCase()?.includes(searchTerm) ||
+    row?.customerId?.toLowerCase()?.includes(searchTerm)
   );
 
   const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredCustomers.length);
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" 
-      alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={600}>Manage Customers
-
-        </Typography>
-        <Button 
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h5" fontWeight={600}>Manage Customers</Typography>
+        <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
@@ -108,17 +111,21 @@ const CustomerCard = () => {
       </Box>
 
       <Box sx={{ display: 'flex', gap: 3, maxWidth: 800, mx: 'auto', mb: 4 }}>
-        <Card sx={{ flex: 1, borderRadius: 2, boxShadow: 3 }}>
+        <Card sx={{ flex: 1, borderRadius: 2, boxShadow: 3, cursor: 'pointer' }} onClick={handleFetchActive}>
           <CardContent>
-            <Typography variant="h4" color="success.main" fontWeight={600}>0</Typography>
+            <Typography variant="h4" color="success.main" fontWeight={600}>
+              {customerList.length}
+            </Typography>
             <Typography variant="subtitle1" fontWeight={500}>Active Customers</Typography>
             <Typography variant="body2" color="text.secondary">(30 days)</Typography>
           </CardContent>
         </Card>
 
-        <Card sx={{ flex: 1, borderRadius: 2, boxShadow: 3 }}>
+        <Card sx={{ flex: 1, borderRadius: 2, boxShadow: 3, cursor: 'pointer' }} onClick={handleFetchBlacklisted}>
           <CardContent>
-            <Typography variant="h4" color="error.main" fontWeight={600}>0</Typography>
+            <Typography variant="h4" color="error.main" fontWeight={600}>
+              {customerList.length}
+            </Typography>
             <Typography variant="subtitle1" fontWeight={500}>Blacklisted Customers</Typography>
             <Typography variant="body2" color="text.secondary">(30 days)</Typography>
           </CardContent>
@@ -172,19 +179,14 @@ const CustomerCard = () => {
             {stableSort(filteredCustomers, getComparator(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) => (
-                <TableRow key={row.id} hover>
+                <TableRow key={row._id || index} hover>
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell>{row.customerId}</TableCell>
                   <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.contact}</TableCell>
+                  <TableCell>{row.contactNumber}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <IconButton 
-                        size="small" 
-                        color="primary"
-                        onClick={() => handleView(row.customerId)}
-                        title="View"
-                      >
+                      <IconButton size="small" color="primary" onClick={() => handleView(row.customerId)} title="View">
                         <VisibilityIcon fontSize="small" />
                       </IconButton>
                       <IconButton size="small" color="primary" title="Edit">
