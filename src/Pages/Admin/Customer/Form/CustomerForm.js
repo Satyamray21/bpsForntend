@@ -65,6 +65,7 @@ const CustomerForm = () => {
       customerProfilePhoto: null
     },
     validationSchema,
+    validateOnMount: true,
     onSubmit: async (values) => {
       try{
         await dispatch(createCustomer(values)).unwrap();
@@ -180,12 +181,12 @@ const CustomerForm = () => {
                         label="Email ID *"
                         type="email"
                         variant="outlined"
-                        name="email"
-                        value={formik.values.email}
+                        name="emailId"
+                        value={formik.values.emailId}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        error={formik.touched.email && Boolean(formik.errors.email)}
-                        helperText={formik.touched.email && formik.errors.email}
+                        error={formik.touched.emailId && Boolean(formik.errors.emailId)}
+                        helperText={formik.touched.emailId && formik.errors.emailId}
                         size="small"
                       />
                     </Grid>
