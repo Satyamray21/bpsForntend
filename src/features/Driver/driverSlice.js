@@ -24,11 +24,11 @@ export const addDriver = createAsyncThunk(
         }
     });
 
-export const totalCount =  createAsyncThunk(
+export const fetchtotalCount =  createAsyncThunk(
     'driver/totalCount',async(_,thunkApi)=>{
         try{
             const res = await axios.get(`${BASE_URL}/total-count`);
-            return res.data.message;
+            return {totalCount:res.data.message};
         }
         catch(error)
         {
@@ -36,11 +36,11 @@ export const totalCount =  createAsyncThunk(
         }
     }
 )
-export const availableCount = createAsyncThunk(
+export const fetchavailableCount = createAsyncThunk(
     'driver/availableCount',async(_,thunkApi)=>{
         try{
             const res = await axios.get(`${BASE_URL}/available-count`);
-            return  res.data.message;
+            return  {availableCount:res.data.message};
         }
         catch(error)
         {
@@ -48,11 +48,11 @@ export const availableCount = createAsyncThunk(
         }
     }
 )
-export const blacklistedCount = createAsyncThunk(
+export const fetchblacklistedCount = createAsyncThunk(
  'driver/blacklistedCount',async(_,thunkApi)=>{
     try{
         const res = await axios.get(`${BASE_URL}/blacklisted-count`);
-        return res.data.message
+        return {blacklistedCount:res.data.message}
     }
     catch(error)
     {
@@ -60,11 +60,11 @@ export const blacklistedCount = createAsyncThunk(
     }
  }
 )
-export const  deactivatedCount = createAsyncThunk(
+export const  fetchdeactivatedCount = createAsyncThunk(
     'driver/deactivatedCount',async(_,thunkApi)=>{
         try{
-            const res = axios.get(`${BASE_URL}/deactive-count`);
-            return res.data.message;
+            const res = await axios.get(`${BASE_URL}/deactive-count`);
+            return {deactivatedCount:res.data.message};
         }
         catch(error)
         {
@@ -72,10 +72,10 @@ export const  deactivatedCount = createAsyncThunk(
         }
     }
 )
-export const totalList = createAsyncThunk(
+export const fetchtotalList = createAsyncThunk(
     'drivers/totalList',async(_,thunkApi)=>{
         try{
-            const res = axios.get(`${BASE_URL}/all`);
+            const res = await axios.get(`${BASE_URL}/all`);
             return res.data.message;
         }
         catch(error)
@@ -85,7 +85,7 @@ export const totalList = createAsyncThunk(
     }
 )
 
-export const availableList = createAsyncThunk(
+export const fetchavailableList = createAsyncThunk(
     'driver/availableList',async(_,thunkApi)=>{
         try{
             const res = await axios.get(`${BASE_URL}/available-list`);
@@ -97,7 +97,7 @@ export const availableList = createAsyncThunk(
         }
     }
 )
-export const blacklistedList = createAsyncThunk(
+export const fetchblacklistedList = createAsyncThunk(
     'driver/blacklistedList',async(_,thunkApi)=>{
         try{
             const res = await axios.get(`${BASE_URL}/blacklisted-list`);
@@ -110,7 +110,7 @@ export const blacklistedList = createAsyncThunk(
 
     }
 )
-export const deactivatedList = createAsyncThunk(
+export const fetchdeactivatedList = createAsyncThunk(
     'driver/deactivatedList',async(_,thunkApi)=>{
         try{
             const res = await axios.get(`${BASE_URL}/deactive-list`);
@@ -126,7 +126,7 @@ export const deactivatedList = createAsyncThunk(
 const initialState = {
     list:[],
     totalCount:0,
-    activeCount:0,
+    availableCount:0,
     blacklistedCount:0,
     deactivatedCount:0,
 
@@ -182,115 +182,115 @@ const driverSlice =  createSlice(
             })
             .addCase(addDriver.rejected,(state,action)=>{
                 state.loading=false;
-                state.error=action.payload
+                state.error=action.payload 
             })
-            .addCase(totalCount.pending, (state) => {
+            .addCase(fetchtotalCount.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(totalCount.fulfilled, (state, action) => {
+              .addCase(fetchtotalCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.totalCount = action.payload;
               })
-              .addCase(totalCount.rejected, (state, action) => {
+              .addCase(fetchtotalCount.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // AVAILABLE COUNT
-              .addCase(availableCount.pending, (state) => {
+              .addCase(fetchavailableCount.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(availableCount.fulfilled, (state, action) => {
+              .addCase(fetchavailableCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.activeCount = action.payload;
               })
-              .addCase(availableCount.rejected, (state, action) => {
+              .addCase(fetchavailableCount.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // BLACKLISTED COUNT
-              .addCase(blacklistedCount.pending, (state) => {
+              .addCase(fetchblacklistedCount.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(blacklistedCount.fulfilled, (state, action) => {
+              .addCase(fetchblacklistedCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.blacklistedCount = action.payload;
               })
-              .addCase(blacklistedCount.rejected, (state, action) => {
+              .addCase(fetchblacklistedCount.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // DEACTIVATED COUNT
-              .addCase(deactivatedCount.pending, (state) => {
+              .addCase(fetchdeactivatedCount.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(deactivatedCount.fulfilled, (state, action) => {
+              .addCase(fetchdeactivatedCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.deactivatedCount = action.payload;
               })
-              .addCase(deactivatedCount.rejected, (state, action) => {
+              .addCase(fetchdeactivatedCount.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // TOTAL LIST
-              .addCase(totalList.pending, (state) => {
+              .addCase(fetchtotalList.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(totalList.fulfilled, (state, action) => {
+              .addCase(fetchtotalList.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
               })
-              .addCase(totalList.rejected, (state, action) => {
+              .addCase(fetchtotalList.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // AVAILABLE LIST
-              .addCase(availableList.pending, (state) => {
+              .addCase(fetchavailableList.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(availableList.fulfilled, (state, action) => {
+              .addCase(fetchavailableList.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
               })
-              .addCase(availableList.rejected, (state, action) => {
+              .addCase(fetchavailableList.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // BLACKLISTED LIST
-              .addCase(blacklistedList.pending, (state) => {
+              .addCase(fetchblacklistedList.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(blacklistedList.fulfilled, (state, action) => {
+              .addCase(fetchblacklistedList.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
               })
-              .addCase(blacklistedList.rejected, (state, action) => {
+              .addCase(fetchblacklistedList.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               })
         
               // DEACTIVATED LIST
-              .addCase(deactivatedList.pending, (state) => {
+              .addCase(fetchdeactivatedList.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
               })
-              .addCase(deactivatedList.fulfilled, (state, action) => {
+              .addCase(fetchdeactivatedList.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.list = action.payload;
               })
-              .addCase(deactivatedList.rejected, (state, action) => {
+              .addCase(fetchdeactivatedList.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
               });
