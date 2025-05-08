@@ -20,7 +20,7 @@ export const addDriver = createAsyncThunk(
         }
         catch(error)
         {
-            return rejectWithValue(err.response?.data?.message || error.message)
+            return rejectWithValue(error.response?.data?.message || error.message)
         }
     });
 const initialState = {
@@ -85,4 +85,4 @@ const driverSlice =  createSlice(
 )
  export const { setFormField, resetForm, addDrivers , setDrivers} = driverSlice.actions;
 
- export default customerSlice.reducer;
+ export default driverSlice.reducer;
