@@ -190,7 +190,7 @@ const driverSlice =  createSlice(
               })
               .addCase(fetchtotalCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.totalCount = action.payload;
+                state.totalCount = action.payload.totalCount;
               })
               .addCase(fetchtotalCount.rejected, (state, action) => {
                 state.status = 'failed';
@@ -204,7 +204,7 @@ const driverSlice =  createSlice(
               })
               .addCase(fetchavailableCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.activeCount = action.payload;
+                state.availableCount = action.payload.availableCount;
               })
               .addCase(fetchavailableCount.rejected, (state, action) => {
                 state.status = 'failed';
@@ -218,7 +218,7 @@ const driverSlice =  createSlice(
               })
               .addCase(fetchblacklistedCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.blacklistedCount = action.payload;
+                state.blacklistedCount = action.payload.blacklistedCount;
               })
               .addCase(fetchblacklistedCount.rejected, (state, action) => {
                 state.status = 'failed';
@@ -232,7 +232,7 @@ const driverSlice =  createSlice(
               })
               .addCase(fetchdeactivatedCount.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.deactivatedCount = action.payload;
+                state.deactivatedCount = action.payload.deactivatedCount;
               })
               .addCase(fetchdeactivatedCount.rejected, (state, action) => {
                 state.status = 'failed';

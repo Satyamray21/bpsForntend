@@ -185,6 +185,12 @@ const [driverRows, setDriverRows] = useState([]);
 
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
+    const cardData = [
+        { id: 1, type: 'available',title: 'Available Driver',  value: availableCount, subtitle: 'Active supervisors', duration: 'Last 30 days', icon: <PeopleIcon fontSize="large" /> },
+        { id: 2, type: 'total',title: 'Total Driver',value: totalCount, subtitle: 'Deactivated supervisors', duration: 'Last 30 days', icon: <AddModeratorIcon fontSize="large" /> },
+        { id: 3, type: 'blacklisted',title: 'Blacklisted', value: blacklistedCount, subtitle: 'Blacklisted supervisors', duration: 'Last 30 days', icon: <BlockIcon fontSize="large" /> },
+        { id: 4, type: 'deactivated',title: 'Deactive', value: deactivatedCount, subtitle: 'System administrators', duration: 'Last 30 days', icon: <AdminPanelSettingsIcon fontSize="large" /> },
+    ];
 
     return (
         <Box sx={{ p: 2 }}>
