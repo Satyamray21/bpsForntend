@@ -74,7 +74,7 @@ export const fetchBlackListedCustomerCount = createAsyncThunk(
   }
 );
 export const deleteCustomer = createAsyncThunk(
-  'stations/deleteCustomer',async(customerId,thunkApi)=>{
+  'customers/deleteCustomer',async(customerId,thunkApi)=>{
     try{
       const res = await axios.delete(`${BASE_URL}/delete/${customerId}`);
       return customerId
@@ -85,6 +85,17 @@ export const deleteCustomer = createAsyncThunk(
     }
   }
 );
+export const viewCustomerById = createAsyncThunk(
+  'customers/viewCustomer',async(customerId,thunkApi)=>{
+    try{
+      const res = await axios.get(`${BASE_URL}/${customerId}`);
+      return res.data.message
+    }catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed fetch  the Customer");
+    }
+  }
+)
 
 const initialState = {
     list: [],
@@ -107,6 +118,8 @@ const initialState = {
     },
     status: 'idle',
     error: null,
+    viewedCustomer: null,
+
   };
 
   const customerSlice = createSlice({
@@ -126,6 +139,10 @@ const initialState = {
         setCustomers: (state, action) => {
           state.list = action.payload;
         },
+        clearViewedCustomer: (state) => {
+          state.viewedCustomer = null;
+        },
+        
       },
       extraReducers: (builder) =>{
         builder
@@ -193,11 +210,31 @@ const initialState = {
       .addCase(deleteCustomer.fulfilled,(state,action)=>{
               state.list = state.list.filter(customer=>customer.customerId !== action.payload);
             })
+            .addCase(viewCustomerById.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(viewCustomerById.fulfilled, (state, action) => {
+  state.loading = false;
+  state.form = {
+    ...state.form,
+    ...action.payload,
+    idPhoto: action.payload.idProofPhoto,
+    customerPhoto: action.payload.customerProfilePhoto,
+    email: action.payload.emailId,
+  };
+})
+.addCase(viewCustomerById.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+});
+
+            
       ;
       }
     }
 
   )
-  export const { setFormField, resetForm, addCustomers, setCustomers } = customerSlice.actions;
+  export const { setFormField, resetForm, addCustomers, setCustomers,clearViewedCustomer} = customerSlice.actions;
 
   export default customerSlice.reducer;
