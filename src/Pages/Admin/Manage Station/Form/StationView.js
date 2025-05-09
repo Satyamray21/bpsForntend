@@ -79,6 +79,13 @@ const StationView = () => {
             dispatch(clearViewedStation());
         }
     },[stationId,dispatch]);
+    if (!station) {
+        return (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+                <Typography variant="h6">Loading station details...</Typography>
+            </Box>
+        );
+    }
     
 console.log("details",station);
     return (

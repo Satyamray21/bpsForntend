@@ -14,41 +14,71 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  IconButton,
+  ListItemText
 } from '@mui/material';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
+  Block as BlockIcon,
+} from '@mui/icons-material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { AdsClick, Search } from '@mui/icons-material';
 import { ReactComponent as CustomCarIcon } from '../../../assets/station/car.svg';
 import StationForm from '../Manage Station/Form/StationForm';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStations,deleteStation,searchStationByName } from '../../../features/stations/stationSlice';
+import { fetchStations, deleteStation, searchStationByName } from '../../../features/stations/stationSlice';
+import { useNavigate } from 'react-router-dom';
 
 const StationCard = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { list: stations, loading, error } = useSelector((state) => state.stations);
 
   const [showForm, setShowForm] = useState(false);
   const [currentStation, setCurrentStation] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const[searchStation,setSearchStation]=useState('');
+  const [searchStation, setSearchStation] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (status) => {
+    if (status) {
+      console.log('Selected:', status);
+      // backend API call here if needed
+    }
+    setAnchorEl(null);
+  };
+
+
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
     dispatch(fetchStations());
   }, [dispatch]);
-  useEffect(()=>{
-    if(searchStation.trim() === '')
-    {
+  useEffect(() => {
+    if (searchStation.trim() === '') {
       dispatch(fetchStations())
     }
-  },[searchStation,dispatch]);
+  }, [searchStation, dispatch]);
   const handleEdit = (station) => {
     setCurrentStation(station);
     setIsEditing(true);
     setShowForm(true);
   };
-  const handleDelete = (stationId)=>{
-    if(window.confirm("Are you sure you want to delete this station ?"))
-    {
+  const handleDelete = (stationId) => {
+    if (window.confirm("Are you sure you want to delete this station ?")) {
       dispatch(deleteStation(stationId));
     }
   }
@@ -57,6 +87,10 @@ const StationCard = () => {
     setIsEditing(false);
     setShowForm(true);
   };
+
+  const handleview = (stationId) => {
+    navigate(`/stationview/${stationId}`);
+  }
 
   return (
     <>
@@ -100,10 +134,9 @@ const StationCard = () => {
           variant="outlined"
           size="small"
           value={searchStation}
-          onChange={(e)=>setSearchStation(e.target.value)}
-          onKeyDown={(e)=>{
-            if(e.key === 'Enter')
-            {
+          onChange={(e) => setSearchStation(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
               dispatch(searchStationByName(searchStation.trim()))
             }
           }}
@@ -117,8 +150,8 @@ const StationCard = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <Search sx={{ color: '#0155a5',cursor:'pointer' }}
-                onClick={()=>dispatch(searchStationByName(searchStation.trim()))} />
+                <Search sx={{ color: '#0155a5', cursor: 'pointer' }}
+                  onClick={() => dispatch(searchStationByName(searchStation.trim()))} />
               </InputAdornment>
             ),
           }}
@@ -149,49 +182,66 @@ const StationCard = () => {
               <TableRow>
                 <TableCell colSpan={6} align="center">No stations found</TableCell>
               </TableRow>
-            ) : (  
-              
-              Array.isArray(stations) &&stations.map((station, index) => (
+            ) : (
+
+              Array.isArray(stations) && stations.map((station, index) => (
                 <TableRow key={station._id || station.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{station.stationId || station.id}</TableCell>
                   <TableCell>{station.stationName}</TableCell>
                   <TableCell>{station.contactNumber}</TableCell>
-                 
-                  
+
+
                   <TableCell>
-                    <Button 
-                      variant="outlined" 
-                      size="small"
-                      onClick={() => handleEdit(station)}
-                      sx={{
-                        color: '#0155a5',
-                        borderColor: '#0155a5',
-                        '&:hover': {
-                          backgroundColor: '#0155a510',
-                          borderColor: '#013f71',
-                        }
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outlined" 
-                      size="small"
-                      onClick={() => handleDelete(station.stationId)}
-                      sx={{
-                        color: '#0155a5',
-                        borderColor: '#0155a5',
-                        '&:hover': {
-                          backgroundColor: '#0155a510',
-                          borderColor: '#013f71',
-                        }
-                      }}
-                    >
-                      Delete
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        title="View"
+                        onClick={()=>handleview(station.stationId)}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" color="primary" ><EditIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(station.stationId)}><DeleteIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="default" onClick={handleClick}><MoreVertIcon fontSize="small" /></IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={() => handleClose(null)}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                        PaperProps={{
+                          elevation: 3,
+                          sx: {
+                            borderRadius: 2,
+                            minWidth: 180,
+                            mt: 1,
+                          },
+                        }}
+                      >
+                        <MenuItem onClick={() => handleClose('Active')}>
+                          <ListItemIcon>
+                            <CheckCircleIcon sx={{ color: 'green' }} fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Active" />
+                        </MenuItem>
+
+                        <MenuItem onClick={() => handleClose('Inactive')}>
+                          <ListItemIcon>
+                            <CancelIcon sx={{ color: 'orange' }} fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Inactive" />
+                        </MenuItem>
+
+                        <MenuItem onClick={() => handleClose('Blacklisted')}>
+                          <ListItemIcon>
+                            <BlockIcon sx={{ color: 'red' }} fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Blacklisted" />
+                        </MenuItem>
+                      </Menu>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -200,14 +250,14 @@ const StationCard = () => {
         </Table>
       </TableContainer>
 
-      <StationForm 
-        open={showForm} 
+      <StationForm
+        open={showForm}
         onClose={() => {
           setShowForm(false);
           setCurrentStation(null);
           setIsEditing(false);
-        }} 
-        onSubmit={() => {}} // Form handling via Redux (you can dispatch createStation here)
+        }}
+        onSubmit={() => { }} // Form handling via Redux (you can dispatch createStation here)
         initialValues={currentStation}
         isEditing={isEditing}
       />
