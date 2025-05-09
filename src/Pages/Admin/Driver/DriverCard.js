@@ -145,9 +145,9 @@ const [driverRows, setDriverRows] = useState([]);
         navigate('/driverform');
     };
 
-    const handleCardClick = (type) => {
-        setSelectedList(type);
-        switch (type) {
+    
+    useEffect(() => {
+        switch (selectedList) {
             case 'total':
                 dispatch(fetchtotalList());
                 break;
@@ -163,7 +163,12 @@ const [driverRows, setDriverRows] = useState([]);
             default:
                 break;
         }
+    }, [selectedList, dispatch]); // re-run when selectedList changes
+
+    const handleCardClick = (type) => {
+        setSelectedList(type); // triggers useEffect to auto-fetch
     };
+
 
     const handleRequestSort = (property) => {
         const isAsc = orderBy === property && order === 'asc';
