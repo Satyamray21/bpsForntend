@@ -40,7 +40,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {fetchtotalCount,fetchavailableCount,fetchblacklistedCount,fetchdeactivatedCount,fetchtotalList,fetchavailableList,fetchblacklistedList,fetchdeactivatedList,deleteDriver} from '../../../features/Driver/driverSlice'
+import {fetchtotalCount,fetchavailableCount,fetchblacklistedCount,fetchdeactivatedCount,fetchtotalList,fetchavailableList,fetchblacklistedList,fetchdeactivatedList,deleteDriver,updateStatus} from '../../../features/Driver/driverSlice'
 const cardData = [
     { id: 1, title: 'Available Driver', value: '0', subtitle: 'Active supervisors', duration: 'Last 30 days', icon: <PeopleIcon fontSize="large" /> },
     { id: 2, title: 'Total Driver', value: '0', subtitle: 'Deactivated supervisors', duration: 'Last 30 days', icon: <AddModeratorIcon fontSize="large" /> },
@@ -91,6 +91,9 @@ const DriverCard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedList, setSelectedList] = useState('available');
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+   const [menuDriverId, setMenuDriverId] = useState(null);
+
 
 const [driverRows, setDriverRows] = useState([]);
 
@@ -109,18 +112,30 @@ const [driverRows, setDriverRows] = useState([]);
         dispatch(fetchavailableList());
 
     }),[dispatch])
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
+    const handleMenuOpen = (e, driverId) => {
+        setMenuAnchorEl(e.currentTarget);
+        setMenuDriverId(driverId);
+      };
+      
 
-    const handleClose = (status) => {
-        if (status) {
-            console.log('Selected:', status);
-            // backend API call here if needed
+      const handleMenuClose = () => {
+        setMenuAnchorEl(null);
+        setMenuDriverId(null);
+      };
+      
+      const handleStatusChange = (statusLabel) => {
+        const statusMap = {
+          Active: "available",
+          Inactive: "deactive",
+          Blacklisted: "blacklisted"
+        };
+        const status = statusMap[statusLabel];
+        if (menuDriverId) {
+          dispatch(updateStatus({ driverId: menuDriverId, status }));
         }
-        setAnchorEl(null);
-    };
-
+        handleMenuClose();
+      };
+      
 
     const open = Boolean(anchorEl);
 
@@ -302,13 +317,13 @@ const [driverRows, setDriverRows] = useState([]);
                                                 <IconButton size="small" color="error" onClick={() => handleDelete(row.driverId)}>
                                                     <DeleteIcon fontSize="small" />
                                                 </IconButton>
-                                                <IconButton size="small" color="default" onClick={handleClick}><MoreVertIcon fontSize="small" /></IconButton>
+                                                <IconButton size="small" color="default" onClick={(e) => handleMenuOpen(e, row.driverId)}><MoreVertIcon fontSize="small" /></IconButton>
                                                 <Menu
                                                     anchorEl={anchorEl}
-                                                    open={open}
-                                                    onClose={() => handleClose(null)}
-                                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                                                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                                    open={Boolean(menuAnchorEl)}
+                                                    onClose={handleMenuClose}
+                                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                                     PaperProps={{
                                                         elevation: 3,
                                                         sx: {
@@ -318,21 +333,21 @@ const [driverRows, setDriverRows] = useState([]);
                                                         },
                                                     }}
                                                 >
-                                                    <MenuItem onClick={() => handleClose('Active')}>
+                                                    <MenuItem onClick={() => handleStatusChange('Active')}>
                                                         <ListItemIcon>
                                                             <CheckCircleIcon sx={{ color: 'green' }} fontSize="small" />
                                                         </ListItemIcon>
                                                         <ListItemText primary="Active" />
                                                     </MenuItem>
 
-                                                    <MenuItem onClick={() => handleClose('Inactive')}>
+                                                    <MenuItem onClick={() => handleStatusChange('Inactive')}>
                                                         <ListItemIcon>
                                                             <CancelIcon sx={{ color: 'orange' }} fontSize="small" />
                                                         </ListItemIcon>
                                                         <ListItemText primary="Inactive" />
                                                     </MenuItem>
 
-                                                    <MenuItem onClick={() => handleClose('Blacklisted')}>
+                                                    <MenuItem onClick={() => handleStatusChange('Blacklisted')}>
                                                         <ListItemIcon>
                                                             <BlockIcon sx={{ color: 'red' }} fontSize="small" />
                                                         </ListItemIcon>
