@@ -1,6 +1,7 @@
 import { createSlice,createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
 
+
 const BASE_URL = 'http://localhost:8000/api/v2';
 
 export const createStation = createAsyncThunk(
@@ -53,6 +54,19 @@ export const searchStationByName = createAsyncThunk(
   }
 )
 
+export const getStationById = createAsyncThunk(
+  'stations/viewStation',async(stationId,thunkApi)=>{
+    try{
+      const res = await axios.get(`${BASE_URL}/stations/searchById/${stationId}`)
+      return res.data.data;
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to view Stations");
+    }
+  }
+)
+
 const initialState = {
   list: [],
   form: {
@@ -66,6 +80,7 @@ const initialState = {
   },
   status: 'idle',
   error: null,
+  viewedStation : null,
 };
 
 const stationSlice = createSlice({
@@ -85,6 +100,9 @@ const stationSlice = createSlice({
     setStations: (state, action) => {
       state.list = action.payload;
     },
+    clearViewedStation:(state)=>{
+      state.viewedStation=null;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -123,11 +141,28 @@ const stationSlice = createSlice({
       state.loading=false;
       state.list=action.payload
       })
+      //view Station 
+      .addCase(getStationById.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(getStationById.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.viewedStation=action.payload;
+        state.form={
+          ...state.form,
+          ...action.payload
+        }
+      })
+      .addCase(getStationById.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload
+      })
       ;
   },
 });
 
 
-export const { setFormField, resetForm, addStation, setStations } = stationSlice.actions;
+export const { setFormField, resetForm, addStation, setStations,clearViewedStation } = stationSlice.actions;
 
 export default stationSlice.reducer;
