@@ -20,6 +20,7 @@ import CustomerView from '../Pages/Admin/Customer/Form/CustomerView';
 import DriverForm from '../Pages/Admin/Driver/Form/DriverForm';
 import ViewDriver from '../Pages/Admin/Driver/Form/ViewDriver';
 import EditDriver from '../Pages/Admin/Driver/Form/EditDriver';
+import StationView from '../Pages/Admin/Manage Station/Form/StationView';
 
 const MainRoute = () => {
     const isAuthenticated = true; // Replace with real auth check
@@ -39,9 +40,15 @@ const MainRoute = () => {
                 <Route path='/quotation' element={<QuotationCard />} />
                 <Route path='/ladger' element={<LedgerCard />} />
                 <Route path='/users' element={<UserCard />} />
-                <Route path='/station' element={<StationCard />} />
+                
                 <Route path='/contact' element={<ContactCard />} />
+                {/* Sation Routing */}
+                <Route path='/station' element={<StationCard />} />
                 <Route path='/stationform' element={<StationForm />} />
+                <Route path='/stationview/:stationId' element = {<StationView />} />
+
+                {/* Customer Router */}
+                
                 <Route path='/customerform' element={<CustomerForm />} />
                 <Route path='/customerview/:customerId' element={< CustomerView />} />
                 {/* Driver Routing */}
