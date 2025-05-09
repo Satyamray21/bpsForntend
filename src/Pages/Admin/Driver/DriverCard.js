@@ -40,7 +40,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {fetchtotalCount,fetchavailableCount,fetchblacklistedCount,fetchdeactivatedCount,fetchtotalList,fetchavailableList,fetchblacklistedList,fetchdeactivatedList} from '../../../features/Driver/driverSlice'
+import {fetchtotalCount,fetchavailableCount,fetchblacklistedCount,fetchdeactivatedCount,fetchtotalList,fetchavailableList,fetchblacklistedList,fetchdeactivatedList,deleteDriver} from '../../../features/Driver/driverSlice'
 const cardData = [
     { id: 1, title: 'Available Driver', value: '0', subtitle: 'Active supervisors', duration: 'Last 30 days', icon: <PeopleIcon fontSize="large" /> },
     { id: 2, title: 'Total Driver', value: '0', subtitle: 'Deactivated supervisors', duration: 'Last 30 days', icon: <AddModeratorIcon fontSize="large" /> },
@@ -167,7 +167,7 @@ const [driverRows, setDriverRows] = useState([]);
         setSearchTerm(event.target.value);
         setPage(0);
     };
-
+    const handleView = (driverId) => navigate(`/viewdriver/${driverId}`);
     const filteredRows = driverRows.filter((row) =>
         (row.driverid && row.driverid.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (`${row.firstName} ${row.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -176,12 +176,13 @@ const [driverRows, setDriverRows] = useState([]);
     
 
 
-    const handleDelete = (driverId) => {
-        if (window.confirm("Are you sure you want to delete this driver?")) {
-            const updatedRows = driverRows.filter((row) => row.driverid !== driverId);
-            setDriverRows(updatedRows);
+    const handleDelete = (driverId)=>{
+          if(window.confirm("Are you sure you want to delete this Driver ?"))
+          {
+            console.log("Deleting ID:", driverId);
+            dispatch(deleteDriver(driverId));
+          }
         }
-    };
 
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
@@ -295,10 +296,10 @@ const [driverRows, setDriverRows] = useState([]);
                                                 <IconButton size="small" color="primary" onClick={() => navigate(`/editdriver/${row.driverid}`)}>
                                                     <EditIcon fontSize="small" />
                                                 </IconButton>
-                                                <IconButton size="small" color="info" onClick={() => navigate('/viewdriver', { state: { driver: row } })}>
+                                                <IconButton size="small" color="info" onClick={() => handleView(row.driverId)}>
                                                     <VisibilityIcon fontSize="small" />
                                                 </IconButton>
-                                                <IconButton size="small" color="error" onClick={() => handleDelete(row.driverid)}>
+                                                <IconButton size="small" color="error" onClick={() => handleDelete(row.driverId)}>
                                                     <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                                 <IconButton size="small" color="default" onClick={handleClick}><MoreVertIcon fontSize="small" /></IconButton>

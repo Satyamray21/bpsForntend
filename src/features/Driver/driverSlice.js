@@ -1,6 +1,6 @@
 import {createSlice,createAsyncThunk} from '@reduxjs/toolkit';
 import axios from "axios";
-import { clearViewedCustomer } from '../customers/customerSlice';
+
 const BASE_URL = "http://localhost:8000/api/v2/driver"
 
 export const addDriver = createAsyncThunk(
@@ -128,7 +128,7 @@ export const deleteDriver = createAsyncThunk(
   'drivers/deleteCustomer',async(driverId,thunkApi)=>{
     try{
       const res = await axios.delete(`${BASE_URL}/delete/${driverId}`);
-      return driverId
+      return {driverId}
     }
     catch(error)
     {
@@ -194,7 +194,7 @@ const driverSlice =  createSlice(
                     setDrivers: (state, action) => {
                       state.list = action.payload;
                     },
-                    clearViewedCustomer:(state)=>{
+                    clearViewedDriver:(state)=>{
                       state.viewedDriver=null
                     },
         },
@@ -324,9 +324,21 @@ const driverSlice =  createSlice(
                 state.error = action.payload;
               })
               //delete Driver
-              .addCase(deleteDriver.fulfilled,(state,action)=>{
-                state.list = state.list.filter(driver=driver.driverId !== action.payload)
+              .addCase(deleteDriver.fulfilled, (state, action) => {
+                console.log("Deleting ID:", action.payload.driverId);
+                console.log("Current list IDs:", state.list.map(d => d.driverId));
+
+                state.list = state.list.filter((item) => item.driverId !== action.payload.driverId);
               })
+              .addCase(deleteDriver.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+              })
+              .addCase(deleteDriver.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload;
+              })
+              
               //view Driver by id
               .addCase(viewDriverById.pending,(state)=>{
                   state.loading=true;
@@ -343,11 +355,13 @@ const driverSlice =  createSlice(
                 state.loading=false;
                 state.error=action.payload
               })
+              
+              
               ;
         }
 
     }
 )
- export const { setFormField, resetForm, addDrivers , setDrivers,clearViewedCustomer} = driverSlice.actions;
+ export const { setFormField, resetForm, addDrivers , setDrivers,clearViewedDriver} = driverSlice.actions;
 
  export default driverSlice.reducer;
