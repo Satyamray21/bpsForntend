@@ -345,7 +345,9 @@ const driverSlice =  createSlice(
                   state.error=false
               })
               .addCase(viewDriverById.fulfilled,(state,action)=>{
+                console.log("Payload received in viewDriverById:", action.payload);
                 state.loading=false;
+                state.viewedDriver = action.payload;
                 state.form={
                   ...state.form,
                   ...action.payload
