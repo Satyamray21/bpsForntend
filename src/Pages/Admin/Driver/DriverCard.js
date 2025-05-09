@@ -127,7 +127,7 @@ const [driverRows, setDriverRows] = useState([]);
         const statusMap = {
           Active: "available",
           Inactive: "deactive",
-          Blacklisted: "blacklisted"
+          Blacklisted: "blacklist"
         };
         const status = statusMap[statusLabel];
         if (menuDriverId) {
