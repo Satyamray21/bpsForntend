@@ -147,7 +147,19 @@ export const viewDriverById = createAsyncThunk(
     }
   }
 )
-
+export const updateStatus = createAsyncThunk(
+  'drivers/updateStatus', async({driverId,status},thunkApi)=>
+  {
+    try{
+      const res = await axios.patch(`${BASE_URL}/driver/status/${driverId}/${status}`);
+      return res.data.message;
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || 'Failed to update Status');
+    }
+  }
+)
 const initialState = {
     list:[],
     totalCount:0,
@@ -357,8 +369,23 @@ const driverSlice =  createSlice(
                 state.loading=false;
                 state.error=action.payload
               })
+              //update Status 
+              .addCase(updateStatus.pending,(state)=>{
+                state.loading = true;
+                state.error=null
+              })
+              .addCase(updateStatus.fulfilled, (state, action) => {
+                state.loading = false;
+                const updatedDriver = action.payload;
+                state.list = state.list.map((driver) => 
+                  driver.driverId === updatedDriver.driverId ? updatedDriver : driver
+                );
+              })
               
-              
+              .addCase(updateStatus.rejected,(state,action)=>{
+                state.loading=false;
+                state.error=action.payload
+              })
               ;
         }
 
