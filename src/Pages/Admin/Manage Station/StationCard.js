@@ -35,7 +35,7 @@ import { ReactComponent as CustomCarIcon } from '../../../assets/station/car.svg
 import StationForm from '../Manage Station/Form/StationForm';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStations, deleteStation, searchStationByName } from '../../../features/stations/stationSlice';
+import { fetchStations, deleteStation, searchStationByName} from '../../../features/stations/stationSlice';
 import { useNavigate } from 'react-router-dom';
 
 const StationCard = () => {
@@ -72,11 +72,6 @@ const StationCard = () => {
       dispatch(fetchStations())
     }
   }, [searchStation, dispatch]);
-  const handleEdit = (station) => {
-    setCurrentStation(station);
-    setIsEditing(true);
-    setShowForm(true);
-  };
   const handleDelete = (stationId) => {
     if (window.confirm("Are you sure you want to delete this station ?")) {
       dispatch(deleteStation(stationId));
@@ -91,6 +86,11 @@ const StationCard = () => {
   const handleview = (stationId) => {
     navigate(`/stationview/${stationId}`);
   }
+
+  const handleEdit = (stationId)=>{
+    navigate(`/editstation/${stationId}`)
+  }
+  
 
   return (
     <>
@@ -204,7 +204,7 @@ const StationCard = () => {
                       </IconButton>
                       <IconButton size="small" color="primary" ><EditIcon fontSize="small" /></IconButton>
                       <IconButton size="small" color="error" onClick={() => handleDelete(station.stationId)}><DeleteIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" color="default" onClick={handleClick}><MoreVertIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="default" onClick={()=>handleEdit(station.stationId)}><MoreVertIcon fontSize="small" /></IconButton>
                       <Menu
                         anchorEl={anchorEl}
                         open={open}
