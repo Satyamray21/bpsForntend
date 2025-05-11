@@ -66,6 +66,19 @@ export const getStationById = createAsyncThunk(
     }
   }
 )
+//update Station
+export const updateStationById = createAsyncThunk(
+  'station/updateStation',async({stationId,data},thunkApi)=>{
+    try{
+     const res = await axios.put(`${BASE_URL}/stations/update/${stationId}`,data)
+     return res.data.message
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to Update Stations");
+    }
+  }
+)
 
 const initialState = {
   list: [],
@@ -158,6 +171,30 @@ const stationSlice = createSlice({
         state.loading=false;
         state.error=action.payload
       })
+      //updateStation
+      .addCase(updateStationById.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(updateStationById.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+      
+        const updatedStation = action.payload;
+        const index = state.list.findIndex(station => station.stationId === updatedStation.stationId);
+        if (index !== -1) {
+          state.list[index] = updatedStation;
+        }
+      
+        
+        state.form = initialState.form;
+        state.viewedStation = null;
+      })
+      .addCase(updateStationById.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      
       ;
   },
 });

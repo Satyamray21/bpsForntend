@@ -202,9 +202,9 @@ const StationCard = () => {
                       >
                         <VisibilityIcon fontSize="small" />
                       </IconButton>
-                      <IconButton size="small" color="primary" ><EditIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="primary" onClick={()=>handleEdit(station.stationId)} ><EditIcon fontSize="small" /></IconButton>
                       <IconButton size="small" color="error" onClick={() => handleDelete(station.stationId)}><DeleteIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" color="default" onClick={()=>handleEdit(station.stationId)}><MoreVertIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="default" ><MoreVertIcon fontSize="small" /></IconButton>
                       <Menu
                         anchorEl={anchorEl}
                         open={open}
