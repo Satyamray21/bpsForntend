@@ -69,10 +69,13 @@ export const  cancelledBookingCount = createAsyncThunk(
 export const fetchBookingsByType = createAsyncThunk(
   'bookings/fetchByType',
   async (type, { rejectWithValue }) => {
+    console.log('Fetching bookings of type:', type)
     try {
       const response = await axios.get(`${BASE_URL}/booking-list?type=${type}`);
-      return { type, data: response.data };
+      console.log('Booking list response:', response.data); // Log the response
+      return { type, data: response.data.data };
     } catch (err) {
+      console.log('Error fetching bookings:', err);
       return rejectWithValue({ type, error: err.response?.data?.message || err.message });
     }
   }
@@ -92,9 +95,9 @@ export const viewBookingById = createAsyncThunk(
 )
 const initialState = {
   list: [],
-  bookingRequestCount: 0,
-activeDeliveriesCount: 0,
-cancelledDeliveriesCount: 0,
+  requestCount: 0,
+  activeDeliveriesCount: 0,
+  cancelledDeliveriesCount: 0,
 
   form: {
   startStation: "",
@@ -200,7 +203,7 @@ const bookingSlice = createSlice({
     })
 
       .addCase(bookingRequestCount.fulfilled, (state, action) => {
-        state.bookingRequestCount = action.payload.requestCount;
+        state.requestCount = action.payload.requestCount;
         })
 .addCase(activeBookingCount.fulfilled, (state, action) => {
   state.activeDeliveriesCount = action.payload.activeDeliveries;
