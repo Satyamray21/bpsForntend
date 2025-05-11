@@ -64,6 +64,33 @@ const initialValues = {
   igst: "",
   grandTotal: "",
 };
+const totalFields = [
+  { name: "freight", label: "FREIGHT", readOnly: false },
+  { name: "ins_vpp", label: "INS/VPP", readOnly: false },
+  { name: "billTotal", label: "Bill Total", readOnly: true },
+  { name: "cgst", label: "CGST%", readOnly: false },
+  { name: "sgst", label: "SGST%", readOnly: false },
+  { name: "igst", label: "IGST%", readOnly: false },
+  { name: "grandTotal", label: "Grand Total", readOnly: true },
+];
+const calculateTotals = (values) => {
+  const items = values.items || [];
+  const billTotal = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+  const freight = Number(values.freight || 0);
+  const ins_vpp = Number(values.ins_vpp || 0);
+  const cgst = Number(values.cgst || 0);
+  const sgst = Number(values.sgst || 0);
+  const igst = Number(values.igst || 0);
+
+  const grandTotal = billTotal + freight + ins_vpp + cgst + sgst + igst;
+
+  return {
+    billTotal: billTotal.toFixed(2),
+    grandTotal: grandTotal.toFixed(2),
+    computedTotalRevenue: grandTotal.toFixed(2)
+  };
+};
 
 const BookingForm = () => {
   const [senderCities, setSenderCities] = React.useState([]);
@@ -96,6 +123,7 @@ const BookingForm = () => {
           <Form>
             <EffectSyncCities values={values} dispatch={dispatch} setSenderCities={setSenderCities}
   setReceiverCities={setReceiverCities}/>
+  <EffectSyncTotals values={values} setFieldValue={setFieldValue} />
             {/* ... all your form fields go here ... */}
             <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
               <Grid container spacing={2}>
@@ -465,25 +493,23 @@ const BookingForm = () => {
                 </Grid>
                 <Grid size={{ xs: 12, md: 3 }}>
                   <Grid container spacing={2}>
-                    {[
-                      ["freight", "FREIGHT"],
-                      ["ins_vpp", "INS/VPP"],
-                      ["billTotal", "Bill Total"],
-                      ["cgst", "CGST%"],
-                      ["sgst", "SGST%"],
-                      ["igst", "IGST%"],
-                      ["grandTotal", "Grand Total"],
-                    ].map(([name, label]) => (
-                      <Grid size={{ xs: 6 }} key={name}>
-                        <TextField
-                          name={name}
-                          label={label}
-                          value={values[name]}
-                          onChange={handleChange}
-                          fullWidth
-                          size="small"
-                        />
-                      </Grid>
+                    {totalFields.map(({ name, label, readOnly }) => (
+    <Grid item xs={6} key={name}>
+      <TextField
+        name={name}
+        label={label}
+        value={values[name]}
+        onChange={handleChange}
+        fullWidth
+        size="small"
+        InputProps={{
+          readOnly: readOnly,
+          ...(label.includes("%") && {
+            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+          }),
+        }}
+      />
+    </Grid>
                     ))}
                   </Grid>
                 </Grid>
@@ -529,6 +555,25 @@ const EffectSyncCities = ({ values, dispatch, setSenderCities, setReceiverCities
       setReceiverCities([]);
     }
   }, [values.toState, dispatch]);
+
+  return null;
+};
+const EffectSyncTotals = ({ values, setFieldValue }) => {
+  useEffect(() => {
+    const totals = calculateTotals(values);
+    setFieldValue("billTotal", totals.billTotal);
+    setFieldValue("grandTotal", totals.grandTotal);
+    // Optional:
+    // setFieldValue("computedTotalRevenue", totals.computedTotalRevenue);
+  }, [
+    values.items,
+    values.freight,
+    values.ins_vpp,
+    values.cgst,
+    values.sgst,
+    values.igst,
+    setFieldValue
+  ]);
 
   return null;
 };
