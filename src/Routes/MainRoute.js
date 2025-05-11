@@ -62,7 +62,7 @@ const MainRoute = () => {
 
             {/*Booking Routing */}
              <Route path='/booking' element={<BookingCard />} />
-            <Route path='/bookingform' element={<BookingForm />} />
+            <Route path='/booking/new' element={<BookingForm />} />
                 
             </Routes>
         </DashboardLayout>
