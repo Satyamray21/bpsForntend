@@ -33,8 +33,8 @@ export const deleteBooking = createAsyncThunk(
 export const bookingRequestCount= createAsyncThunk(
   'booking/bookingRequestCount',async(_,thunkApi)=>{
     try{
-      const res = await axios.get(`${BASE_URL}/bookings/count/requests`)
-      return {requestCount : res.data.bookingRequests}
+      const res = await axios.get(`${BASE_URL}/booking-list?type='request`)
+      return {requestCount : res.data.count}
     }
     catch(error)
     {
