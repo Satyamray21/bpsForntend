@@ -15,9 +15,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
+import {fetchStations} from '../../../../features/stations/stationSlice'
 import { createBooking } from '../../../../features/booking/bookingSlice';
 
-const stationOptions = ["Kanpur", "Station B", "Station C"];
+
 const toPay = ['pay', 'paid','none'];
 
 const initialValues = {
@@ -65,11 +66,17 @@ const initialValues = {
 };
 
 const BookingForm = () => {
+  const [senderCities, setSenderCities] = React.useState([]);
+  const [receiverCities, setReceiverCities] = React.useState([]);
+ 
   const dispatch = useDispatch();
   const { states, cities } = useSelector((state) => state.location);
+  const { list: stations } = useSelector((state) => state.stations);
+
 
   useEffect(() => {
     dispatch(fetchStates());
+    dispatch(fetchStations());
   }, [dispatch]);
 
   return (
@@ -87,7 +94,8 @@ const BookingForm = () => {
       >
         {({ values, handleChange, setFieldValue }) => (
           <Form>
-            <EffectSyncCities values={values} dispatch={dispatch} />
+            <EffectSyncCities values={values} dispatch={dispatch} setSenderCities={setSenderCities}
+  setReceiverCities={setReceiverCities}/>
             {/* ... all your form fields go here ... */}
             <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
               <Grid container spacing={2}>
@@ -100,11 +108,12 @@ const BookingForm = () => {
                     value={values.startStation}
                     onChange={handleChange}
                   >
-                    {stationOptions.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
+                    {stations.map((station) => (
+                    <MenuItem key={station.stationId || station.sNo} value={station.stationName}>
+                            {station.stationName}
+                     </MenuItem>
+                      ))}
+
                   </TextField>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
@@ -116,11 +125,11 @@ const BookingForm = () => {
                     value={values.endStation}
                     onChange={handleChange}
                   >
-                    {stationOptions.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
+                    {stations.map((station) => (
+                    <MenuItem key={station.stationId || station.sNo} value={station.stationName}>
+                            {station.stationName}
+                     </MenuItem>
+                      ))}
                   </TextField>
                 </Grid>
 
@@ -265,7 +274,7 @@ const BookingForm = () => {
                     value={values.fromCity}
                     onChange={handleChange}
                   >
-                    {cities.map((c) => (
+                    {senderCities.map((c) => (
                       <MenuItem key={c} value={c}>
                         {c}
                       </MenuItem>
@@ -337,7 +346,7 @@ const BookingForm = () => {
                     value={values.toCity}
                     onChange={handleChange}
                   >
-                    {cities.map((c) => (
+                    {receiverCities.map((c) => (
                       <MenuItem key={c} value={c}>
                         {c}
                       </MenuItem>
@@ -498,24 +507,31 @@ const BookingForm = () => {
   );
 };
 
-const EffectSyncCities = ({ values, dispatch }) => {
+const EffectSyncCities = ({ values, dispatch, setSenderCities, setReceiverCities }) => {
   useEffect(() => {
     if (values.fromState) {
-      dispatch(fetchCities(values.fromState));
+      dispatch(fetchCities(values.fromState))
+        .unwrap()
+        .then((res) => setSenderCities(res))
+        .catch(console.error);
     } else {
-      dispatch(clearCities());
+      setSenderCities([]);
     }
   }, [values.fromState, dispatch]);
 
   useEffect(() => {
     if (values.toState) {
-      dispatch(fetchCities(values.toState));
+      dispatch(fetchCities(values.toState))
+        .unwrap()
+        .then((res) => setReceiverCities(res))
+        .catch(console.error);
     } else {
-      dispatch(clearCities());
+      setReceiverCities([]);
     }
   }, [values.toState, dispatch]);
 
   return null;
 };
+
 
 export default BookingForm;
