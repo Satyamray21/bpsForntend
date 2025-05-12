@@ -23,6 +23,7 @@ import EditDriver from '../Pages/Admin/Driver/Form/EditDriver';
 import StationView from '../Pages/Admin/Manage Station/Form/StationView';
 import EditStation from '../Pages/Admin/Manage Station/Form/EditStation';
 import BookingForm from '../Pages/Admin/Booking/Form/BookingForm';
+import QuotationForm from '../Pages/Admin/Quotation/Form/QuotationForm'
 
 const MainRoute = () => {
     const isAuthenticated = true; // Replace with real auth check
@@ -39,7 +40,7 @@ const MainRoute = () => {
                 <Route path='/vehicle' element={<VehicleCard />} />
                 <Route path='/customer' element={<CustomerCard />} />
                 <Route path='/tracker' element={<TrackerCard />} />
-                <Route path='/quotation' element={<QuotationCard />} />
+                
                 <Route path='/ladger' element={<LedgerCard />} />
                 <Route path='/users' element={<UserCard />} />
                 
@@ -63,6 +64,10 @@ const MainRoute = () => {
             {/*Booking Routing */}
              <Route path='/booking' element={<BookingCard />} />
             <Route path='/booking/new' element={<BookingForm />} />
+
+            {/* Quotation routing */}
+                <Route path='/quotation' element={<QuotationCard />} />
+                <Route path='/quotationform' element={<QuotationForm />} />
                 
             </Routes>
         </DashboardLayout>
