@@ -8,22 +8,68 @@ import {
   Avatar,
   Stack,
   Card,
-  CardContent
+  CardContent,
+  Button,
+  TextField
 } from '@mui/material';
-import { Person, Home, InsertDriveFile } from '@mui/icons-material';
+import { Person, Home, InsertDriveFile, ArrowBack } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { viewCustomerById, clearViewedCustomer } from  '../../../../features/customers/customerSlice'
+import { useParams, useNavigate } from 'react-router-dom';
+import { viewCustomerById, clearViewedCustomer } from '../../../../features/customers/customerSlice';
 
-const InfoRow = ({ label, value }) => (
+const StyledTextField = ({ label, value }) => (
   <Grid item xs={12} sm={6} md={4}>
-    <Typography variant="body2" fontWeight={600}>{label}</Typography>
-    <Typography variant="body1" color="text.secondary">{value || '-'}</Typography>
+    <TextField
+      label={label}
+      value={value || '-'}
+      fullWidth
+      variant="outlined"
+      InputProps={{
+        readOnly: true,
+        style: {
+          borderRadius: 12,
+          backgroundColor: '#fff',
+        }
+      }}
+      InputLabelProps={{
+        style: {
+          fontWeight: 600
+        }
+      }}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          '&:hover fieldset': {
+            borderColor: '#1976d2',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#1976d2',
+            boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)'
+          }
+        },
+        mb: 2
+      }}
+    />
   </Grid>
+);
+
+const SectionHeader = ({ icon, title }) => (
+  <Box sx={{
+    bgcolor: 'primary.light',
+    px: 2,
+    py: 1,
+    borderRadius: 1,
+    display: 'flex',
+    alignItems: 'center',
+    mb: 2
+  }}>
+    {icon}
+    <Typography variant="h6" fontWeight={600} ml={1}>{title}</Typography>
+  </Box>
 );
 
 const CustomerView = () => {
   const { customerId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const form = useSelector((state) => state.customers.form);
   const loading = useSelector((state) => state.customers.loading);
@@ -40,71 +86,86 @@ const CustomerView = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1200, mx: 'auto' }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-        <Typography variant="h4" align="center" fontWeight={600} gutterBottom>
-          Customer Details
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h4" fontWeight={600}>
+            Customer Details
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBack />}
+            onClick={() => navigate(-1)}
+          >
+            Back
+          </Button>
+        </Box>
 
         {loading ? (
           <Typography align="center">Loading...</Typography>
         ) : (
           <>
-            <Card sx={{ mt: 3, p: 2 }}>
-              <CardContent>
-                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  <Person color="primary" />
-                  <Typography variant="h6">Personal Information</Typography>
-                </Stack>
+            {/* Personal Info */}
+            <Card sx={{ mt: 3, p: 2, bgcolor: 'grey.50' }}>
+              <CardContent sx={{ px: { xs: 1, md: 3 }, py: 2 }}>
+                <SectionHeader icon={<Person />} title="Personal Information" />
                 <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={2}>
-                  <InfoRow label="First Name" value={form.firstName} />
-                  <InfoRow label="Middle Name" value={form.middleName} />
-                  <InfoRow label="Last Name" value={form.lastName} />
-                  <InfoRow label="Contact Number" value={form.contactNumber} />
-                  <InfoRow label="Email" value={form.email} />
+                  <StyledTextField label="First Name" value={form?.firstName} />
+                  <StyledTextField label="Middle Name" value={form?.middleName} />
+                  <StyledTextField label="Last Name" value={form?.lastName} />
+                  <StyledTextField label="Contact Number" value={form?.contactNumber} />
+                  <StyledTextField label="Email" value={form?.email} />
                 </Grid>
               </CardContent>
             </Card>
 
-            <Card sx={{ mt: 3, p: 2 }}>
-              <CardContent>
-                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  <Home color="primary" />
-                  <Typography variant="h6">Address Information</Typography>
-                </Stack>
+            {/* Address Info */}
+            <Card sx={{ mt: 3, p: 2, bgcolor: 'grey.50' }}>
+              <CardContent sx={{ px: { xs: 1, md: 3 }, py: 2 }}>
+                <SectionHeader icon={<Home />} title="Address Information" />
                 <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={2}>
-                  <InfoRow label="Address" value={form.address} />
-                  <InfoRow label="State" value={form.state} />
-                  <InfoRow label="City" value={form.city} />
-                  <InfoRow label="District" value={form.district} />
-                  <InfoRow label="Pincode" value={form.pincode} />
+                  <StyledTextField label="Address" value={form?.address} />
+                  <StyledTextField label="State" value={form?.state} />
+                  <StyledTextField label="City" value={form?.city} />
+                  <StyledTextField label="District" value={form?.district} />
+                  <StyledTextField label="Pincode" value={form?.pincode} />
                 </Grid>
               </CardContent>
             </Card>
 
-            <Card sx={{ mt: 3, p: 2 }}>
-              <CardContent>
-                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  <InsertDriveFile color="primary" />
-                  <Typography variant="h6">Documents</Typography>
-                </Stack>
+            {/* Documents */}
+            <Card sx={{ mt: 3, p: 2, bgcolor: 'grey.50' }}>
+              <CardContent sx={{ px: { xs: 1, md: 3 }, py: 2 }}>
+                <SectionHeader icon={<InsertDriveFile />} title="Documents" />
                 <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={2}>
-                  <InfoRow label="ID Proof Type" value={form.idProof} />
+                  <StyledTextField label="ID Proof Type" value={form?.idProof} />
                   <Grid item xs={12} sm={6} md={4}>
                     <Typography variant="body2" fontWeight={600}>ID Photo</Typography>
                     <Avatar
-                      src={form.idPhoto}
+                      src={form?.idPhoto ? `http://localhost:8000/${form?.idPhoto}` : '/placeholder.png'}
                       variant="rounded"
-                      sx={{ width: 100, height: 100, mt: 1 }}
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        mt: 1,
+                        border: '2px solid #1976d2',
+                        boxShadow: 3
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
                     <Typography variant="body2" fontWeight={600}>Customer Photo</Typography>
                     <Avatar
-                      src={form.customerProfilePhoto}
+                      src={form?.customerPhoto ? `http://localhost:8000/${form?.customerPhoto}` : '/placeholder.png'}
                       variant="rounded"
-                      sx={{ width: 100, height: 100, mt: 1 }}
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        mt: 1,
+                        border: '2px solid #1976d2',
+                        boxShadow: 3
+                      }}
                     />
                   </Grid>
                 </Grid>

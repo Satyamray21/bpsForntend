@@ -1,4 +1,4 @@
-import  {createSlice,createAsyncThunk} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 const BASE_URL = 'http://localhost:8000/api/v2/customers';
 
@@ -25,18 +25,19 @@ export const createCustomer = createAsyncThunk(
     }
   }
 );
+
 export const fetchActiveCustomer = createAsyncThunk(
-  'customers/fetchActiveCustomer',async(_,thunkApi)=>{
-    try{
+  'customers/fetchActiveCustomer',
+  async (_, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/active-list`)
       return res.data.message;
-    }
-    catch(error)
-    {
-        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Active Customer");
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Active Customer");
     }
   }
-) 
+);
+
 export const fetchActiveCustomerCount = createAsyncThunk(
   'customers/fetchActiveCustomerCount',
   async (_, thunkApi) => {
@@ -49,19 +50,18 @@ export const fetchActiveCustomerCount = createAsyncThunk(
   }
 );
 
-
 export const fetchBlackListedCustomer = createAsyncThunk(
-  'customers/fetchBlackListedCustomer',async(_,thunkApi)=>{
-    try{
+  'customers/fetchBlackListedCustomer',
+  async (_, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/blacklisted-list`)
       return res.data.message;
-    }
-    catch(error)
-    {
-        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Blacklisted  Customer");
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Blacklisted Customer");
     }
   }
-) 
+);
+
 export const fetchBlackListedCustomerCount = createAsyncThunk(
   'customers/fetchBlackListedCustomerCount',
   async (_, thunkApi) => {
@@ -73,117 +73,137 @@ export const fetchBlackListedCustomerCount = createAsyncThunk(
     }
   }
 );
+
 export const deleteCustomer = createAsyncThunk(
-  'customers/deleteCustomer',async(customerId,thunkApi)=>{
-    try{
+  'customers/deleteCustomer',
+  async (customerId, thunkApi) => {
+    try {
       const res = await axios.delete(`${BASE_URL}/delete/${customerId}`);
-      return customerId
-    }
-    catch(error)
-    {
+      return customerId;
+    } catch (error) {
       return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the Customer");
     }
   }
 );
+
 export const viewCustomerById = createAsyncThunk(
-  'customers/viewCustomer',async(customerId,thunkApi)=>{
-    try{
+  'customers/viewCustomer',
+  async (customerId, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/${customerId}`);
-      return res.data.message
-    }catch(error)
-    {
-      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed fetch  the Customer");
+      return res.data.message;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed fetch the Customer");
     }
   }
-)
+);
+
+export const updateCustomer = createAsyncThunk(
+  'customer/updatedCustomer',
+  async ({ customerId, data }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `${BASE_URL}/update/${customerId}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.data.message;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
 
 const initialState = {
-    list: [],
-    activeCount: 0,
-    blacklistCount: 0,
-    form: {
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        contactNumber: '',
-        email: '',
-        address: '',
-        state: '',
-        city: '',
-        district: '',
-        pincode: '',
-        idProof: '',
-        idPhoto: null,
-        customerPhoto: null
+  list: [],
+  activeCount: 0,
+  blacklistCount: 0,
+  form: {
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    contactNumber: '',
+    email: '',
+    address: '',
+    state: '',
+    city: '',
+    district: '',
+    pincode: '',
+    idProof: '',
+    idPhoto: null,
+    customerPhoto: null
+  },
+  status: 'idle',
+  error: null,
+  viewedCustomer: null,
+  loading: false
+};
+
+const customerSlice = createSlice({
+  name: 'customers',
+  initialState,
+  reducers: {
+    setFormField: (state, action) => {
+      const { field, value } = action.payload;
+      state.form[field] = value;
     },
-    status: 'idle',
-    error: null,
-    viewedCustomer: null,
-
-  };
-
-  const customerSlice = createSlice({
-    name:'customers',
-    initialState,
-    reducers: {
-        setFormField: (state, action) => {
-          const { field, value } = action.payload;
-          state.form[field] = value;
-        },
-        resetForm: (state) => {
-          state.form = initialState.form;
-        },
-        addCustomers: (state, action) => {
-          state.list.push(action.payload);
-        },
-        setCustomers: (state, action) => {
-          state.list = action.payload;
-        },
-        clearViewedCustomer: (state) => {
-          state.viewedCustomer = null;
-        },
-        
-      },
-      extraReducers: (builder) =>{
-        builder
-        .addCase(createCustomer.pending,(state)=>{
-            state.loading=true;
-            state.error=null;
-        })
-        .addCase(createCustomer.fulfilled,(state,action)=>{
-            state.status = 'succeeded';
-            state.error = null;
-        })
-        .addCase(createCustomer.rejected,(state,action)=>{
-            state.loading=false;
-            state.error=action.payload
-        })
-            .addCase(fetchActiveCustomer.pending,(state)=>{
-                state.loading=true;
-                state.error=null
-              })
-              .addCase(fetchActiveCustomer.fulfilled,(state,action)=>{
-                state.loading=false;
-                state.list=action.payload
-              })
-              .addCase(fetchActiveCustomer.rejected,(state,action)=>{
-                state.loading=false;
-                state.error=action.payload
-              })
-              .addCase(fetchBlackListedCustomer.pending,(state)=>{
-                state.loading=true;
-                state.error=null
-              })
-              .addCase(fetchBlackListedCustomer.fulfilled,(state,action)=>{
-                state.loading=false;
-                state.list=action.payload
-              })
-              .addCase(fetchBlackListedCustomer.rejected,(state,action)=>{
-                state.loading=false;
-                state.error=action.payload
-              })
-              
-        .addCase(fetchActiveCustomerCount.pending, (state) => {
+    resetForm: (state) => {
+      state.form = initialState.form;
+    },
+    addCustomers: (state, action) => {
+      state.list.push(action.payload);
+    },
+    setCustomers: (state, action) => {
+      state.list = action.payload;
+    },
+    clearViewedCustomer: (state) => {
+      state.viewedCustomer = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(createCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createCustomer.fulfilled, (state) => {
+        state.loading = false;
+        state.status = 'succeeded';
+        state.error = null;
+      })
+      .addCase(createCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchActiveCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchActiveCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(fetchActiveCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchBlackListedCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBlackListedCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(fetchBlackListedCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchActiveCustomerCount.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
@@ -207,34 +227,95 @@ const initialState = {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(deleteCustomer.fulfilled,(state,action)=>{
-              state.list = state.list.filter(customer=>customer.customerId !== action.payload);
-            })
-            .addCase(viewCustomerById.pending, (state) => {
-  state.loading = true;
-  state.error = null;
-})
-.addCase(viewCustomerById.fulfilled, (state, action) => {
-  state.loading = false;
-  state.form = {
-    ...state.form,
-    ...action.payload,
-    idPhoto: action.payload.idProofPhoto,
-    customerPhoto: action.payload.customerProfilePhoto,
-    email: action.payload.emailId,
-  };
-})
-.addCase(viewCustomerById.rejected, (state, action) => {
-  state.loading = false;
-  state.error = action.payload;
+      .addCase(deleteCustomer.fulfilled, (state, action) => {
+        state.list = state.list.filter(customer => customer.customerId !== action.payload);
+      })
+      .addCase(viewCustomerById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(viewCustomerById.fulfilled, (state, action) => {
+        state.loading = false;
+        const payload = action.payload;
+        state.form = {
+          firstName: payload.firstName || '',
+          middleName: payload.middleName || '',
+          lastName: payload.lastName || '',
+          contactNumber: payload.contactNumber || '',
+          email: payload.emailId || '',
+          address: payload.address || '',
+          state: payload.state || '',
+          city: payload.city || '',
+          district: payload.district || '',
+          pincode: payload.pincode || '',
+          idProof: payload.idProof || '',
+          idPhoto: payload.idProofPhoto
+            ? `http://localhost:8000/${payload.idProofPhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+            : null,
+          customerPhoto: payload.customerProfilePhoto
+            ? `http://localhost:8000/${payload.customerProfilePhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+            : null
+        };
+      })
+      .addCase(viewCustomerById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        state.status = 'succeeded';
+        state.error = null;
+
+        // Update customer in list
+        const updatedCustomer = action.payload;
+        state.list = state.list.map(customer =>
+          customer.customerId === updatedCustomer.customerId ? updatedCustomer : customer
+        );
+
+        // Update viewed customer if it's the same one
+        if (state.viewedCustomer?.customerId === updatedCustomer.customerId) {
+          state.viewedCustomer = updatedCustomer;
+        }
+
+        // Update form fields
+        const payload = action.payload;
+        state.form = {
+          firstName: payload.firstName || '',
+          middleName: payload.middleName || '',
+          lastName: payload.lastName || '',
+          contactNumber: payload.contactNumber || '',
+          email: payload.emailId || '',
+          address: payload.address || '',
+          state: payload.state || '',
+          city: payload.city || '',
+          district: payload.district || '',
+          pincode: payload.pincode || '',
+          idProof: payload.idProof || '',
+          idPhoto: payload.idProofPhoto
+            ? `http://localhost:8000/${payload.idProofPhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+            : null,
+          customerPhoto: payload.customerProfilePhoto
+            ? `http://localhost:8000/${payload.customerProfilePhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+            : null
+        };
+      })
+      .addCase(updateCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  }
 });
 
-            
-      ;
-      }
-    }
+export const {
+  setFormField,
+  resetForm,
+  addCustomers,
+  setCustomers,
+  clearViewedCustomer
+} = customerSlice.actions;
 
-  )
-  export const { setFormField, resetForm, addCustomers, setCustomers,clearViewedCustomer} = customerSlice.actions;
-
-  export default customerSlice.reducer;
+export default customerSlice.reducer;

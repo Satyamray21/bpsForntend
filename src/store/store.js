@@ -12,7 +12,7 @@ export const store = configureStore({
     customers: customerReducer,
     drivers: driverReducer,
     bookings:bookingReducer,
-    quotations:quotationReducer
+    quotations:quotationReducer,
 
   },
 });

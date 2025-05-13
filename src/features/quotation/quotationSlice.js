@@ -31,20 +31,20 @@ export const deleteBooking = createAsyncThunk(
   }
 )
 //booking request.
-export const fetchBookingRequest= createAsyncThunk(
-  'booking/bookingRequestCount',async(_,thunkApi)=>{
-    try{
-      const res = await axios.get(`${BASE_URL}/booking-request-list`)
-      return {requestCount : res.data.data.totalNonActiveNonCancelled,
-        deliveries:res.data.data.deliveries,
-      }
-    }
-    catch(error)
-    {
-      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Booking request ");
+export const fetchBookingRequest = createAsyncThunk(
+  'booking/bookingRequestCount',
+  async (_, thunkApi) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/booking-request-list`);
+      return res.data.data.deliveries; // ✅ Corrected return
+    } catch (error) {
+      return thunkApi.rejectWithValue(
+        error.response?.data?.message || "Failed to fetch Booking request"
+      );
     }
   }
-)
+);
+
 //active booking.
 export const fetchActiveBooking = createAsyncThunk(
   'booking/activeBooking', async(_,thunkApi)=>{
@@ -181,12 +181,16 @@ const quotationSlice = createSlice({
     
 
       .addCase(fetchBookingRequest.fulfilled, (state, action) => {
-        state.requestCount = action.payload.requestCount;
-        state.list = action.payload.deliveries;
+        
+        state.list = action.payload;
         })
+        .addCase(fetchBookingRequest.rejected, (state, action) => {
+         console.error("Fetch error:", action.error.message);
+        })
+
         .addCase(fetchActiveBooking.fulfilled, (state, action) => {
-        state.activeDeliveriesCount = action.payload.activeDeliveries;
-        state.list = action.payload. deliveries ;
+        
+        state.list = action.payload;
         })
         .addCase(fetchCancelledBooking.fulfilled, (state, action) => {
         state.cancelledDeliveriesCount = action.payload.cancelledCount;
